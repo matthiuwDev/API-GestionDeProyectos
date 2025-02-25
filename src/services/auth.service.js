@@ -29,7 +29,8 @@ class UserService{
             if(!validPassword) throw new Error("La contraseña es incorrecta")
 
             return {
-                email: user.email
+                email: user.email,
+                rolId: user.rolId
             };
         } catch (error) {
             throw new Error("Error en el login: " + error.message);

@@ -2,7 +2,7 @@ import { Router } from "express";
 import taskController from "../../controllers/task.controller.js";
 const router = Router();
 import { validate } from "../../middlewares/validateData.middleware.js";
-import { task } from "../../middlewares/schemes/task.scheme.js";
+import { task } from "../../schemes/task.scheme.js";
 
 router
     .get('/', taskController.getTasks)

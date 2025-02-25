@@ -1,5 +1,6 @@
 //Configuración de Express
 import express from 'express'
+import cookieParser from 'cookie-parser'; 
 import v1ProjectsRouter from './v1/routes/projects.routes.js';
 import v1TaskRouter from './v1/routes/tasks.routes.js'
 import v1AuthRouter from './v1/routes/auth.routes.js'
@@ -9,7 +10,8 @@ import { errorHandler } from './middlewares/errorHandler.middleware.js';
 const app = express();
 
 //Middlewares
-app.use(express.json())
+app.use(express.json());
+app.use(cookieParser());
 
 
 //Rutas
