@@ -1,0 +1,23 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${EXTERNAL_PORT}:${PORT}"
+    environment:
+      PGUSER: ${PGUSER}
+      PGPASSWORD: ${PGPASSWORD}
+      PGHOST: ${PGHOST}
+      PGDATABASE: ${PGDATABASE}
+      PGPORT: ${PGPORT}
+      SECRET_JWT_KEY: ${SECRET_JWT_KEY}
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
+    ports:
+      - "${EXTERNAL_PGPORT}:${PGPORT}"

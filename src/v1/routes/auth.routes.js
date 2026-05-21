@@ -9,7 +9,7 @@ import { login } from "../../schemes/login.scheme.js";
 router
     .post('/login', validate(login), authController.userLogin)
     .post('/register', validate(register), authController.userRegister)
-    .get('/protected', validateToken, authController.greetUser)
+    .get('/protected', authController.greetUser)
     .post('/logout')
     
 
