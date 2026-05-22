@@ -1,9 +1,9 @@
-import { Task } from "../models/Task.js";
+import db from "../database/database.js";
 
 class TaskService{
     getTasks = async () => {
         try {
-            const tasks = await Task.findAll();
+            const tasks = await db.Task.findAll();
 
             return tasks;
         } catch (error) {
@@ -13,7 +13,7 @@ class TaskService{
 
     getOneTask = async (id) => {
         try {
-            const task = Task.findOne({
+            const task = db.Task.findOne({
                 where: {
                     id
                 }
@@ -31,7 +31,7 @@ class TaskService{
 
     createTask = async (newTask) => {
         try {
-            const createdTask = await Task.create(newTask);
+            const createdTask = await db.Task.create(newTask);
 
             return createdTask
         } catch (error) {
@@ -41,7 +41,7 @@ class TaskService{
 
     updateTask = async (id, changes) => {
         try {
-            const task = await Task.findByPk(id);
+            const task = await db.Task.findByPk(id);
 
             if(!task){
                 throw new Error(`No se encontró la tarea con ID ${id}`)
@@ -58,7 +58,7 @@ class TaskService{
 
     deleteTask = async (id) => {
         try {
-            await Task.destroy({
+            await db.Task.destroy({
                 where: {
                     id,
                 }

@@ -1,9 +1,9 @@
-import { User } from "../models/User.js";
+import db from "../database/database.js";
 
 class UserService{
     getUsers = async () => {
         try {
-            const users = await User.findAll();
+            const users = await db.User.findAll();
 
             return users;
         } catch (error) {

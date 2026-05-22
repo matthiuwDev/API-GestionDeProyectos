@@ -1,11 +1,10 @@
-import { Project } from "../models/Project.js";
-import { Task } from "../models/Task.js";
+import db from "../database/database.js";
 
 class ProjectsService{
 
     getProjects = async() => {
         try {
-            const projects = await Project.findAll();
+            const projects = await db.Project.findAll();
 
             return projects;
         } catch (error) {
@@ -15,7 +14,7 @@ class ProjectsService{
 
     getOneProject = async (id) => {
         try {
-            const project = await Project.findOne({
+            const project = await db.Project.findOne({
                 where: {
                     id
                 }
@@ -34,7 +33,7 @@ class ProjectsService{
 
     createProject = async (newProject) => {
         try {
-            const createdProject = await Project.create(newProject);
+            const createdProject = await db.Project.create(newProject);
     
             return createdProject; 
         } catch (error) {
@@ -44,7 +43,7 @@ class ProjectsService{
 
     updateProject = async (id, changes) => {
         try {
-            const project = await Project.findByPk(id);
+            const project = await db.Project.findByPk(id);
             
             if (!project) {
                 throw new Error(`No se encontró el proyecto con ID ${id}`);
@@ -61,7 +60,7 @@ class ProjectsService{
 
     deleteProject = async (id) => {
         try {
-            await Project.destroy({
+            await db.Project.destroy({
                where: {
                 id,
                }
@@ -73,17 +72,17 @@ class ProjectsService{
         }
     }
 
-    getTasksByProject = async (id) => {
-        try {
-            const tasks = await Task.findAll({
-                where: { projectId: id }
-            });
+    // getTasksByProject = async (id) => {
+    //     try {
+    //         const tasks = await db.Task.findAll({
+    //             where: { projectId: id }
+    //         });
 
-            return tasks;
-        } catch (error) {
-            throw new Error("Error al obtener las tareas de un proyecto: " + error.message);
-        }
-    }
+    //         return tasks;
+    //     } catch (error) {
+    //         throw new Error("Error al obtener las tareas de un proyecto: " + error.message);
+    //     }
+    // }
 }
 
 export default new ProjectsService();

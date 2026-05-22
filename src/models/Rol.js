@@ -1,27 +1,26 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../database/database.js";
-import { User } from "./User.js";
 
-export const Rol = sequelize.define('roles', {
+export default function (sequelize) {
+  const Rol = sequelize.define('roles', {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false
     },
-}, {
+  }, {
     timestamps: false
-});
+  });
 
-Rol.hasMany(User, {
-    foreignKey: 'rolId',
-    sourceKey: 'id'
-});
+  Rol.associate = function (models) {
+    Rol.hasMany(models.User, {
+      foreignKey: 'rolId',
+      sourceKey: 'id'
+    });
+  };
 
-User.belongsTo(Rol, {
-    foreignKey: 'rolId',
-    targetKey: 'id'
-});
+  return Rol;
+}
