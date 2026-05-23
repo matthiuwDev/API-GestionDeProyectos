@@ -1,23 +1,29 @@
-import projectsService from "../services/projects.service.js" 
+import projectsService from "../services/projects.service.js";
 
-class ProjectsController{
+class ProjectsController {
+    
     getProjects = async (req, res, next) => {
         try {
             const projects = await projectsService.getProjects();
-
-            res.send({ status: 'OK', data: projects });
+            res.status(200).json({ status: 'OK', data: projects });
         } catch (error) {
             next(error);
         }
     }
 
     getOneProject = async (req, res, next) => {
-        const { id } = req.params;
-
         try {
-            const project = await projectsService.getOneProject(id);
+            const { id } = req.params;
+            
+            if (!id) {
+                return res.status(400).json({ 
+                    status: "FAILED", 
+                    data: { error: "El parámetro ':id' no puede estar vacío" } 
+                });
+            }
 
-            res.send({ status: 'OK', data: project })
+            const project = await projectsService.getOneProject(id);
+            res.status(200).json({ status: 'OK', data: project });
         } catch (error) {
             next(error);
         }
@@ -34,7 +40,6 @@ class ProjectsController{
             };
 
             const createdProject = await projectsService.createProject(newProject);
-
             res.status(201).json({ status: "CREATED", data: createdProject });
         } catch (error) {
             next(error); 
@@ -48,38 +53,31 @@ class ProjectsController{
             if (!id) {
                 return res.status(400).json({ 
                     status: "FAILED", 
-                    data: { error: "Parámetro ':id' no puede estar vacío " } 
+                    data: { error: "El parámetro ':id' no puede estar vacío" } 
                 });
             }
     
             const updatedProject = await projectsService.updateProject(id, body); 
-    
             res.status(200).json({ status: "OK", data: updatedProject });
         } catch (error) {
             next(error);
         }
     };
-    
 
     deleteProject = async (req, res, next) => {
-        const { id } = req.params;
-
         try {
-            projectsService.deleteProject(id)
+            const { id } = req.params;
 
-            res.sendStatus(204)
-        } catch (error) {
-            next(error)
-        }
-    }
+            if (!id) {
+                return res.status(400).json({ 
+                    status: "FAILED", 
+                    data: { error: "El parámetro ':id' no puede estar vacío" } 
+                });
+            }
 
-    getTasksByProject = async (req, res, next) => {
-        const { id } = req.params;
+            await projectsService.deleteProject(id);
 
-        try {
-            const tasks = await projectsService.getTasksByProject(id);
-
-            res.send({ status: 'OK', data: tasks });
+            res.sendStatus(204);
         } catch (error) {
             next(error);
         }

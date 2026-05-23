@@ -16,11 +16,6 @@ export default function (sequelize) {
       type: DataTypes.ENUM('TODO', 'IN_PROGRESS', 'DONE'),
       defaultValue: "TODO"
     },
-    testSync: {
-      type: DataTypes.STRING,
-      allowNull: false, 
-      validate: { notEmpty: true }
-    },
   });
 
   Task.associate = function (models) {
