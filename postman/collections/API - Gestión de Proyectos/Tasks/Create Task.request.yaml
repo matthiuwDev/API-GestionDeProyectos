@@ -2,7 +2,7 @@ $kind: http-request
 name: Create Task
 method: POST
 url: '{{baseUrl}}/api/v1/tasks'
-order: 2000
+order: 3000
 headers:
   - key: Content-Type
     value: application/json
@@ -10,6 +10,7 @@ body:
   type: json
   content: |-
     {
-      "name": "My Task",
-      "projectId": 1
+      "name": "Implement feature X",
+      "status": "TODO",
+      "userStoryId": 1
     }

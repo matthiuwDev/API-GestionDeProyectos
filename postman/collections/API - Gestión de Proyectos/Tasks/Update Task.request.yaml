@@ -1,7 +1,7 @@
 $kind: http-request
 name: Update Task
 method: PUT
-url: '{{baseUrl}}/api/v1/tasks/{{taskId}}'
+url: '{{baseUrl}}/api/v1/tasks/1'
 order: 4000
 headers:
   - key: Content-Type
@@ -10,6 +10,7 @@ body:
   type: json
   content: |-
     {
-      "name": "Updated Task",
-      "done": true
+      "name": "Updated task",
+      "status": "IN_PROGRESS",
+      "userStoryId": 1
     }

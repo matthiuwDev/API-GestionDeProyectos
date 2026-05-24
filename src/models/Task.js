@@ -12,7 +12,7 @@ export default function (sequelize) {
       allowNull: false, 
       validate: { notEmpty: true }
     },
-    done: {
+    status: {
       type: DataTypes.ENUM('TODO', 'IN_PROGRESS', 'DONE'),
       defaultValue: "TODO"
     },

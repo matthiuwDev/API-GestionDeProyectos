@@ -1,5 +1,5 @@
 $kind: http-request
 name: Delete Project
 method: DELETE
-url: '{{baseUrl}}/api/v1/projects/{{projectId}}'
+url: '{{baseUrl}}/api/v1/projects/1'
 order: 5000

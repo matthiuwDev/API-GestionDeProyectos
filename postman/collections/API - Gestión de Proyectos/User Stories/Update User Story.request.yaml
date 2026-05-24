@@ -1,0 +1,16 @@
+$kind: http-request
+name: Update User Story
+method: PUT
+url: '{{baseUrl}}/api/v1/user-stories/1'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Updated user story",
+      "description": 2,
+      "projectId": 1
+    }

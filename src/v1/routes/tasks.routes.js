@@ -1,5 +1,5 @@
 import { Router } from "express";
-import tasksController from "../../controllers/tasks.controller.js";
+import tasksController from "../../controllers/task.controller.js";
 import { validate } from "../../middlewares/validateData.middleware.js";
 import { task } from "../../schemes/task.scheme.js";
 

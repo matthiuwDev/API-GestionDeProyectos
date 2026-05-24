@@ -1,5 +1,0 @@
-$kind: http-request
-name: Get Project by ID
-method: GET
-url: '{{baseUrl}}/api/v1/projects/{{projectId}}'
-order: 3000

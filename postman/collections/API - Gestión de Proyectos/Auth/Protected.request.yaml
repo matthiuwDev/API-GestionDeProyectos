@@ -1,5 +1,5 @@
 $kind: http-request
-name: GET /protected
+name: Protected
 method: GET
 url: '{{baseUrl}}/api/v1/auth/protected'
 order: 3000

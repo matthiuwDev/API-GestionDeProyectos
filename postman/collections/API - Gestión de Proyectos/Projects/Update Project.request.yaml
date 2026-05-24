@@ -1,7 +1,7 @@
 $kind: http-request
 name: Update Project
 method: PUT
-url: '{{baseUrl}}/api/v1/projects/{{projectId}}'
+url: '{{baseUrl}}/api/v1/projects/1'
 order: 4000
 headers:
   - key: Content-Type

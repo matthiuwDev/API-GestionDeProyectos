@@ -1,0 +1,5 @@
+$kind: http-request
+id: b205e08a-2f51-4e8c-b7d5-0312c1a5ae1b
+url: http://localhost:4000/db/sync
+method: HEAD
+order: 1401315078963199
