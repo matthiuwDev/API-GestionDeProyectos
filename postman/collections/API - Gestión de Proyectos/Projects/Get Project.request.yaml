@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Project
+method: GET
+url: '{{baseUrl}}/api/v1/projects/1'
+order: 2000

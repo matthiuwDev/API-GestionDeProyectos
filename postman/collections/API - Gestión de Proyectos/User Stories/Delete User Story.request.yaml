@@ -1,0 +1,5 @@
+$kind: http-request
+name: Delete User Story
+method: DELETE
+url: '{{baseUrl}}/api/v1/user-stories/1'
+order: 5000

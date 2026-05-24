@@ -1,0 +1,16 @@
+$kind: http-request
+name: Create Project
+method: POST
+url: '{{baseUrl}}/api/v1/projects'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "My Project",
+      "priority": 1,
+      "description": "Project description"
+    }

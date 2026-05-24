@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get User Story
+method: GET
+url: '{{baseUrl}}/api/v1/user-stories/1'
+order: 2000
