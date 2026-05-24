@@ -1,0 +1,15 @@
+$kind: http-request
+name: Update Task
+method: PUT
+url: '{{baseUrl}}/api/v1/tasks/{{taskId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Updated Task",
+      "done": true
+    }

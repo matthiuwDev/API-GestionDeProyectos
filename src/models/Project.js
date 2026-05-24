@@ -1,41 +1,40 @@
-import { DataTypes } from 'sequelize'
-import { sequelize } from '../database/database.js'
+import { DataTypes } from 'sequelize';
 
-import { Task } from './Task.js'
-
-export const Project = sequelize.define('projects', {
+export default function (sequelize) {
+  const Project = sequelize.define('projects', {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true  
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true  
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: true, 
-        },
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: true, 
+      },
     },
     priority: {
-        type: DataTypes.INTEGER,
-        validate: {
-            min: 1,
-            max: 5,
-        },
+      type: DataTypes.INTEGER,
+      validate: {
+        min: 1,
+        max: 5,
+      },
     },
     description: {
-        type: DataTypes.STRING
+      type: DataTypes.STRING
     },
-}, {
+  }, {
     timestamps: true
-});
+  });
 
-Project.hasMany(Task, {
-    foreignKey: 'projectId',
-    sourceKey: 'id'
-});
+  Project.associate = function (models) {
+    Project.hasMany(models.UserStory, { 
+      foreignKey: 'projectId', 
+      sourceKey: 'id', 
+      onDelete: 'CASCADE' 
+    });
+  };
 
-Task.belongsTo(Project, {
-    foreignKey: 'projectId',
-    targetKey: 'id'
-});
+  return Project;
+}

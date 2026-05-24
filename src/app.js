@@ -4,6 +4,9 @@ import cookieParser from 'cookie-parser';
 import v1ProjectsRouter from './v1/routes/projects.routes.js';
 import v1TaskRouter from './v1/routes/tasks.routes.js'
 import v1AuthRouter from './v1/routes/auth.routes.js'
+import v1UserRouter from './v1/routes/users.routes.js'
+import v1UserStoriesRouter from './v1/routes/userStories.routes.js'
+import dbRouter from './helpers/db.js';
 
 import { errorHandler } from './middlewares/errorHandler.middleware.js';
 
@@ -13,11 +16,15 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+//API Sync DB
+app.use('/db', dbRouter);
 
 //Rutas
 app.use("/api/v1/projects", v1ProjectsRouter)
 app.use("/api/v1/tasks", v1TaskRouter)
 app.use("/api/v1/auth", v1AuthRouter)
+app.use("/api/v1/users", v1UserRouter)
+app.use("/api/v1/user-stories", v1UserStoriesRouter)
 
 app.use(errorHandler);
 

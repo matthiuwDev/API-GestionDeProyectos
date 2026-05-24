@@ -1,72 +1,45 @@
-import { Task } from "../models/Task.js";
+import db from "../database/database.js";
 
-class TaskService{
+class TasksService {
     getTasks = async () => {
-        try {
-            const tasks = await Task.findAll();
-
-            return tasks;
-        } catch (error) {
-            throw new Error("Error al obtener las tareas: " + error.message);
-        }
+        return await db.Task.findAll();
     }
 
     getOneTask = async (id) => {
-        try {
-            const task = Task.findOne({
-                where: {
-                    id
-                }
-            });
+        const task = await db.Task.findByPk(id);
 
-            if(!task){
-                throw new Error(`No se encontró la tarea con ID ${id}`);
-            }
-
-            return task;
-        } catch (error) {
-            throw new Error("Error al obtener la tarea: " + error.message);
+        if(!task){
+            throw new Error(`No se encontró la tarea con ID ${id}`);
         }
+        return task;
     }
 
     createTask = async (newTask) => {
-        try {
-            const createdTask = await Task.create(newTask);
-
-            return createdTask
-        } catch (error) {
-            throw new Error("Error al crear la tarea: " + error.message);   
-        }
+        return await db.Task.create(newTask);
     }
 
     updateTask = async (id, changes) => {
-        try {
-            const task = await Task.findByPk(id);
+        const task = await db.Task.findByPk(id);
 
-            if(!task){
-                throw new Error(`No se encontró la tarea con ID ${id}`)
-            }
-
-            await task.update(changes);
-
-            return task;
-        } catch (error) {
-            throw new Error(`Error al actualizar la tarea: ${error.message}`);
+        if(!task){
+            throw new Error(`No se puede actualizar: No se encontró la tarea con ID ${id}`);
         }
 
+        await task.update(changes);
+        return task;
     }
 
     deleteTask = async (id) => {
-        try {
-            await Task.destroy({
-                where: {
-                    id,
-                }
-            })
-        } catch (error) {
-            throw new Error("Error al eliminar la tarea: " + error.message);
+        const deletedRows = await db.Task.destroy({
+            where: { id }
+        });
+
+        if (deletedRows === 0) {
+            throw new Error(`No se puede eliminar: No se encontró la tarea con ID ${id}`);
         }
+        
+        return true;
     }
 }
 
-export default new TaskService(); 
+export default new TasksService();

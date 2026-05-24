@@ -1,11 +1,11 @@
-import { User } from "../models/User.js";
+import db from "../database/database.js";
 import bcrypt from 'bcryptjs';
 
 class UserService{
 
     createUser = async (newUser) => {
         try {
-            const existingUser = await User.findOne({ where: { email: newUser.email } });
+            const existingUser = await db.User.findOne({ where: { email: newUser.email } });
 
             if (existingUser) throw new Error("Este usuario ya está registrado");
 
@@ -20,7 +20,7 @@ class UserService{
 
     loginUser = async ({ email, password }) => {
         try {
-            const user = await User.findOne({ where: { email: email } })
+            const user = await db.User.findOne({ where: { email: email } })
 
             if (!user) throw new Error("Usuario no encontrado");
 

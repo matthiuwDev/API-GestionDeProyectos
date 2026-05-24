@@ -1,46 +1,49 @@
 import tasksService from "../services/tasks.service.js";
 
-class TaskController{
+class TasksController {
+    
     getTasks = async (req, res, next) => {
         try {
             const tasks = await tasksService.getTasks();
-
-            res.send({ status: 'OK', data: tasks });
-        } catch (error) {
-            next(error)
-        }
-    }
-
-    getOneTask = async (req, res, next) => {
-        const { id } = req.params;
-
-        try {
-            const task = await tasksService.getOneTask(id);
-
-            res.send({ status: 'OK', data: task });
+            res.status(200).json({ status: 'OK', data: tasks });
         } catch (error) {
             next(error);
         }
     }
 
-    createTask = async (req,res, next) => {
-        const { body } = req;
+    getOneTask = async (req, res, next) => {
         try {
+            const { id } = req.params;
+            
+            if (!id) {
+                return res.status(400).json({ 
+                    status: "FAILED", 
+                    data: { error: "El parámetro ':id' no puede estar vacío" } 
+                });
+            }
+
+            const task = await tasksService.getOneTask(id);
+            res.status(200).json({ status: 'OK', data: task });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    createTask = async (req, res, next) => {
+        try {
+            const { body } = req;
+            
             const newTask = {
                 name: body.name,
-                done: body.done,
-                projectId: body.projectId
-
+                status: body.status || 'TODO', 
+                userStoryId: body.userStoryId 
             };
 
             const createdTask = await tasksService.createTask(newTask);
-
             res.status(201).json({ status: "CREATED", data: createdTask });
-
         } catch (error) {
-            next(error)
+            next(error);
         }
-        
     }
 
     updateTask = async (req, res, next) => {
@@ -50,29 +53,34 @@ class TaskController{
             if (!id) {
                 return res.status(400).json({ 
                     status: "FAILED", 
-                    data: { error: "Parámetro ':id' no puede estar vacío " } 
+                    data: { error: "El parámetro ':id' no puede estar vacío" } 
                 });
             }
 
             const updatedTask = await tasksService.updateTask(id, body);
-            
-            res.status(200).json({ status: "OK", data: updatedTask })
+            res.status(200).json({ status: "OK", data: updatedTask });
         } catch (error) {
             next(error);
         }
     }
 
     deleteTask = async (req, res, next) => {
-        const { id } = req.params;
-
         try {
-            tasksService.deleteTask(id);
+            const { id } = req.params;
 
+            if (!id) {
+                return res.status(400).json({ 
+                    status: "FAILED", 
+                    data: { error: "El parámetro ':id' no puede estar vacío" } 
+                });
+            }
+
+            await tasksService.deleteTask(id);
             res.sendStatus(204);
         } catch (error) {
-            next(error)
+            next(error);
         }
     }
 }
 
-export default new TaskController();
+export default new TasksController();

@@ -1,0 +1,9 @@
+$kind: collection
+name: API - Gestión de Proyectos
+variables:
+  - key: baseUrl
+    value: 'http://localhost:3000'
+  - key: projectId
+    value: '1'
+  - key: taskId
+    value: '1'

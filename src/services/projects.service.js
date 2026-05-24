@@ -1,88 +1,51 @@
-import { Project } from "../models/Project.js";
-import { Task } from "../models/Task.js";
+import db from "../database/database.js";
 
-class ProjectsService{
+class ProjectsService {
 
-    getProjects = async() => {
-        try {
-            const projects = await Project.findAll();
-
-            return projects;
-        } catch (error) {
-            throw new Error("Error al obtener los proyectos: " + error.message);
-        }
+    getProjects = async () => {
+        return await db.Project.findAll();
     }
 
     getOneProject = async (id) => {
-        try {
-            const project = await Project.findOne({
-                where: {
-                    id
-                }
-            });
-            
-            if (!project) {
-                throw new Error(`No se encontró el proyecto con ID ${id}`);
+        const project = await db.Project.findByPk(id, {
+            include: {
+                model: db.UserStory,
+                include: [db.Task]
             }
-    
-            return project; 
-            
-        } catch (error) {
-            throw new Error("Error al obtener el proyecto: " + error.message);
+        });
+        
+        if (!project) {
+            throw new Error(`No se encontró el proyecto con ID ${id}`);
         }
+
+        return project; 
     }
 
     createProject = async (newProject) => {
-        try {
-            const createdProject = await Project.create(newProject);
-    
-            return createdProject; 
-        } catch (error) {
-            throw new Error("Error al crear el proyecto: " + error.message);
-        }
+        return await db.Project.create(newProject); 
     }
 
     updateProject = async (id, changes) => {
-        try {
-            const project = await Project.findByPk(id);
-            
-            if (!project) {
-                throw new Error(`No se encontró el proyecto con ID ${id}`);
-            }
-    
-            await project.update(changes); 
-    
-            return project; 
-        } catch (error) {
-            throw new Error(`Error al actualizar el proyecto: ${error.message}`);
+        const project = await db.Project.findByPk(id);
+        
+        if (!project) {
+            throw new Error(`No se puede actualizar: No se encontró el proyecto con ID ${id}`);
         }
+
+        await project.update(changes); 
+        return project; 
     };
     
-
     deleteProject = async (id) => {
-        try {
-            await Project.destroy({
-               where: {
-                id,
-               }
-            })
+        const deletedRows = await db.Project.destroy({
+            where: { id }
+        });
 
-            
-        } catch (error) {
-            throw new Error("Error al eliminar el proyecto: " + error.message);
+        if (deletedRows === 0) {
+            throw new Error(`No se puede eliminar: No se encontró el proyecto con ID ${id}`);
         }
-    }
 
-    getTasksByProject = async (id) => {
-        try {
-            const tasks = await Task.findAll({
-                where: { projectId: id }
-            });
-
-            return tasks;
-        } catch (error) {
-            throw new Error("Error al obtener las tareas de un proyecto: " + error.message);
-        }
+        return true;
     }
 }
 

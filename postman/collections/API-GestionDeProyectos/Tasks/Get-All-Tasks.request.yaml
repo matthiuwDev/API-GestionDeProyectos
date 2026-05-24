@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Tasks
+method: GET
+url: '{{baseUrl}}/api/v1/tasks'
+order: 1000

@@ -1,14 +1,15 @@
 import { Router } from "express";
-import taskController from "../../controllers/task.controller.js";
-const router = Router();
+import tasksController from "../../controllers/tasks.controller.js";
 import { validate } from "../../middlewares/validateData.middleware.js";
 import { task } from "../../schemes/task.scheme.js";
 
+const router = Router();
+
 router
-    .get('/', taskController.getTasks)
-    .post('/', validate(task), taskController.createTask)
-    .put('/:id',taskController.updateTask)
-    .delete('/:id', taskController.deleteTask)
-    .get('/:id', taskController.getOneTask)
+    .get('/', tasksController.getTasks)
+    .post('/', validate(task), tasksController.createTask)
+    .get('/:id', tasksController.getOneTask)
+    .put('/:id', tasksController.updateTask)
+    .delete('/:id', tasksController.deleteTask);
 
 export default router;
