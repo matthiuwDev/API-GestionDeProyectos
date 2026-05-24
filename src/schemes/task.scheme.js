@@ -1,8 +1,7 @@
 import Joi from "joi";
 
-//Task Sheme
 export const task = Joi.object({
     name: Joi.string().required(),
-    done: Joi.string().optional,
+    status: Joi.string().valid('TODO', 'IN_PROGRESS', 'DONE').optional(),
     userStoryId: Joi.number().required()
-})
+});
