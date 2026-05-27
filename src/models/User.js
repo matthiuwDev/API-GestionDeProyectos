@@ -30,26 +30,28 @@ export default function (sequelize) {
         notEmpty: true,
       }
     },
-    rolId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+    role: {
+      type: DataTypes.ENUM('ADMIN', 'USER'),
+      defaultValue: 'USER',
+      allowNull: false
     }
   }, {
     timestamps: true,
     hooks: {
       beforeCreate: async (user) => {
-        const saltRounds = 10;
-        user.password = await bcrypt.hash(user.password, saltRounds);
+        if (user.password) {
+            const saltRounds = 10;
+            user.password = await bcrypt.hash(user.password, saltRounds);
+        }
+      },
+      beforeUpdate: async (user) => {
+        if (user.changed('password')) {
+            const saltRounds = 10;
+            user.password = await bcrypt.hash(user.password, saltRounds);
+        }
       }
     }
   });
-
-  User.associate = function (models) {
-    User.belongsTo(models.Rol, {
-      foreignKey: 'rolId',
-      targetKey: 'id'
-    });
-  };
 
   return User;
 }
