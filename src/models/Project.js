@@ -34,6 +34,8 @@ export default function (sequelize) {
       sourceKey: 'id', 
       onDelete: 'CASCADE' 
     });
+
+    Project.belongsTo(models.User, { foreignKey: 'userId', targetId: 'id' });
   };
 
   return Project;

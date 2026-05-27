@@ -4,7 +4,10 @@ class ProjectsController {
     
     getProjects = async (req, res, next) => {
         try {
-            const projects = await projectsService.getProjects();
+            const userId = req.user.id; 
+            
+            const projects = await projectsService.getProjects(userId);
+            
             res.status(200).json({ status: 'OK', data: projects });
         } catch (error) {
             next(error);
@@ -37,6 +40,7 @@ class ProjectsController {
                 name: body.name,
                 priority: body.priority,
                 description: body.description,
+                userId: req.user.id
             };
 
             const createdProject = await projectsService.createProject(newProject);

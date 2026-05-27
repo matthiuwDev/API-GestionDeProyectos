@@ -53,5 +53,9 @@ export default function (sequelize) {
     }
   });
 
+  User.associate = function (models) {
+    User.hasMany(models.Project, { foreignKey: 'userId', sourceKey: 'id', onDelete: 'CASCADE' });
+  };
+
   return User;
 }
