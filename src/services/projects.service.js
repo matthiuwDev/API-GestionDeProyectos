@@ -2,8 +2,10 @@ import db from "../database/database.js";
 
 class ProjectsService {
 
-    getProjects = async () => {
-        return await db.Project.findAll();
+    getProjects = async (userId) => {
+        return await db.Project.findAll({ 
+            where: { userId }
+        });
     }
 
     getOneProject = async (id) => {
@@ -25,26 +27,27 @@ class ProjectsService {
         return await db.Project.create(newProject); 
     }
 
-    updateProject = async (id, changes) => {
-        const project = await db.Project.findByPk(id);
+    updateProject = async (projectId, userId, changes) => {
+        const project = await db.Project.findOne({ 
+            where: { id: projectId, userId }
+        });
         
         if (!project) {
-            throw new Error(`No se puede actualizar: No se encontró el proyecto con ID ${id}`);
+            throw new Error(`Operación denegada o proyecto no encontrado`);
         }
 
         await project.update(changes); 
         return project; 
     };
-    
-    deleteProject = async (id) => {
+
+    deleteProject = async (projectId, userId) => {
         const deletedRows = await db.Project.destroy({
-            where: { id }
+            where: { id: projectId, userId }
         });
 
         if (deletedRows === 0) {
-            throw new Error(`No se puede eliminar: No se encontró el proyecto con ID ${id}`);
+            throw new Error(`Operación denegada o proyecto no encontrado`);
         }
-
         return true;
     }
 }
