@@ -35,7 +35,11 @@ export default function (sequelize) {
       onDelete: 'CASCADE' 
     });
 
-    Project.belongsTo(models.User, { foreignKey: 'userId', targetId: 'id' });
+    Project.belongsToMany(models.User, { 
+      through: 'projects_users',
+      foreignKey: 'projectId', 
+      otherKey: 'userId'
+    });
   };
 
   return Project;
