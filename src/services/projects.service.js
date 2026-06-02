@@ -1,17 +1,17 @@
 import db from '../database/database.js';
 
 class ProjectsService {
-    getProjects = async (userId) => {
+  getProjects = async (userId) => {
     return await db.Project.findAll({
-        include: { 
-            model: db.User, 
-            attributes: ['id', 'name', 'email'],
-            where: { id: userId }, 
-            through: { 
-                attributes: ['role', 'status'],
-                where: { status: 'ACCEPTED' } 
-            } 
-        } 
+      include: {
+        model: db.User,
+        attributes: ['id', 'name', 'email'],
+        where: { id: userId },
+        through: {
+          attributes: ['role', 'status'],
+          where: { status: 'ACCEPTED' }
+        }
+      }
     });
   };
 
@@ -49,26 +49,24 @@ class ProjectsService {
     }
   };
 
-  updateProject = async (projectId, userId, changes) => {
-    const project = await db.Project.findOne({
-      where: { id: projectId, userId }
-    });
+  updateProject = async (projectId, changes) => {
+    const project = await db.Project.findByPk(projectId);
 
     if (!project) {
-      throw new Error(`Operación denegada o proyecto no encontrado`);
+      throw new Error(`Proyecto no encontrado`);
     }
 
     await project.update(changes);
     return project;
   };
 
-  deleteProject = async (projectId, userId) => {
+  deleteProject = async (projectId) => {
     const deletedRows = await db.Project.destroy({
-      where: { id: projectId, userId }
+      where: { id: projectId }
     });
 
     if (deletedRows === 0) {
-      throw new Error(`Operación denegada o proyecto no encontrado`);
+      throw new Error(`Proyecto no encontrado`);
     }
     return true;
   };
