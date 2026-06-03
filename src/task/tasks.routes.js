@@ -1,7 +1,7 @@
 import { Router } from "express";
-import tasksController from "../../controllers/task.controller.js";
-import { validate } from "../../middlewares/validateData.middleware.js";
-import { task } from "../../schemes/task.scheme.js";
+import tasksController from "./task.controller.js";
+import { validate } from "../middlewares/validateData.middleware.js";
+import { task } from "./task.scheme.js";
 
 const router = Router();
 

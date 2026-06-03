@@ -1,11 +1,11 @@
 //Configuración de Express
 import express from 'express'
 import cookieParser from 'cookie-parser'; 
-import v1ProjectsRouter from './v1/routes/projects.routes.js';
-import v1TaskRouter from './v1/routes/tasks.routes.js'
-import v1AuthRouter from './v1/routes/auth.routes.js'
-import v1UserRouter from './v1/routes/users.routes.js'
-import v1UserStoriesRouter from './v1/routes/userStories.routes.js'
+import projectsRouter from './project/projects.routes.js';
+import taskRouter from './task/tasks.routes.js'
+import authRouter from './auth/auth.routes.js'
+import userRouter from './user/users.routes.js'
+import userStoriesRouter from './userStory/userStories.routes.js'
 import dbRouter from './helpers/db.js';
 
 import { errorHandler } from './middlewares/errorHandler.middleware.js';
@@ -20,11 +20,11 @@ app.use(cookieParser());
 app.use('/db', dbRouter);
 
 //Rutas
-app.use("/api/v1/projects", v1ProjectsRouter)
-app.use("/api/v1/tasks", v1TaskRouter)
-app.use("/api/v1/auth", v1AuthRouter)
-app.use("/api/v1/users", v1UserRouter)
-app.use("/api/v1/user-stories", v1UserStoriesRouter)
+app.use("/api/v1/projects", projectsRouter)
+app.use("/api/v1/tasks", taskRouter)
+app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/users", userRouter)
+app.use("/api/v1/user-stories", userStoriesRouter)
 
 app.use(errorHandler);
 

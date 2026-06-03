@@ -1,4 +1,4 @@
-import projectsService from "../services/projects.service.js";
+import projectsService from "./projects.service.js";
 
 class ProjectsController {
     

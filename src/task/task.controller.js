@@ -1,4 +1,4 @@
-import tasksService from "../services/tasks.service.js";
+import tasksService from "./tasks.service.js";
 
 class TasksController {
     
