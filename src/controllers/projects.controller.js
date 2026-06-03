@@ -88,6 +88,37 @@ class ProjectsController {
             next(error);
         }
     }
+
+    inviteUserProject = async (req, res, next) => {
+        try {
+            const { email } = req.body; 
+            const { id: projectId } = req.params; 
+            const inviter = req.user;
+
+            if (!email) {
+                return res.status(400).json({ status: "FAILED", message: "El email es requerido" });
+            }
+
+            await projectsService.inviteUserProject(email, projectId, inviter);
+
+            res.status(200).json({ status: "OK", message: "Email de invitación enviado correctamente" });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    acceptInvitation = async (req, res, next) => {
+        try {
+            const { token } = req.body;
+            const invitedUserId = req.user.id; 
+
+            await projectsService.acceptInvitation(token, invitedUserId);
+            
+            res.status(200).json({ status: "OK", message: "Invitación Aceptada" });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default new ProjectsController();

@@ -1,0 +1,14 @@
+$kind: http-request
+name: Invitar Usuario
+url: "{{baseUrl}}/api/v1/projects/1/invite"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"correo@correo.com\"\r
+
+    }"
+auth:
+  type: noauth
+order: 5325

@@ -1,14 +1,13 @@
 workspace:
   id: 0d9e1c29-9331-43aa-82e2-f32f5829c67d
-
 localResources:
   collections: []
-
-# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
-
+  environments:
+    - ../postman/environments/Local.environment.yaml
 cloudResources:
   collections: {}
-
+  environments:
+    ../postman/environments/Local.environment.yaml: 55062072-4421a40a-2354-4707-905c-b0401283246f
 dependencies:
   collections:
     55062072-8bbb85cb-3421-43ca-81ca-cb7aa3b9c7e8:
