@@ -1,9 +1,9 @@
 import { Router } from "express";
-import projectsController from "../../controllers/projects.controller.js";
-import { validateToken } from "../../middlewares/validateToken.middleware.js";
-import { verifyProjectOwner } from "../../middlewares/verifyRole.middleware.js";
-import { validate } from "../../middlewares/validateData.middleware.js";
-import { project } from "../../schemes/project.scheme.js";
+import projectsController from "./projects.controller.js";
+import { validateToken } from "../middlewares/validateToken.middleware.js";
+import { verifyProjectOwner } from "../middlewares/verifyRole.middleware.js";
+import { validate } from "../middlewares/validateData.middleware.js";
+import { project } from "./project.scheme.js";
 
 const router = Router();
 

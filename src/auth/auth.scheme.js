@@ -9,3 +9,9 @@ export const register = Joi.object({
         .messages({ "any.only": "Las contraseñas no coinciden" }),
     inviteToken: Joi.string().optional()
 });
+
+//Login Scheme
+export const login = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+});

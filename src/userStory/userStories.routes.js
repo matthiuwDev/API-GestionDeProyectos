@@ -1,8 +1,8 @@
 import { Router } from "express";
-import userStoriesController from "../../controllers/userStories.controller.js";
+import userStoriesController from "./userStories.controller.js";
 const router = Router();
-import { validate } from "../../middlewares/validateData.middleware.js";
-import { userStory } from "../../schemes/userStory.scheme.js";
+import { validate } from "../middlewares/validateData.middleware.js";
+import { userStory } from "./userStory.scheme.js";
 
 router
     .get('/', userStoriesController.getAllUserStories)

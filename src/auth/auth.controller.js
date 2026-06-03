@@ -1,4 +1,4 @@
-import authService from '../services/auth.service.js';
+import authService from './auth.service.js';
 import { generateToken } from '../helpers/tokenHelper.js';
 
 class AuthController {
