@@ -1,0 +1,17 @@
+$kind: http-request
+name: Aceptar Invitación
+url: "{{baseUrl}}/api/v1/projects/invitations/accept"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"token\": \"2fdd9667f9da42b68c14092991a4943442fd3d20e8c55f22ac798dfcb1eb44f0ec751d194754df0c\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJtYXR0aGl1dzAwNUBnbWFpbC5jb20iLCJuYW1lIjoiVXN1YXJpbyBBZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4MDQ5NDI2NiwiZXhwIjoxNzgwNDk3ODY2fQ.iBtUJJQOgAtSkJgvbHeuobRg_tahRJ5at1zq0qikloY
+examples: .resources/Aceptar Invitación.resources/examples
+order: 6826

@@ -54,7 +54,11 @@ export default function (sequelize) {
   });
 
   User.associate = function (models) {
-    User.hasMany(models.Project, { foreignKey: 'userId', sourceKey: 'id', onDelete: 'CASCADE' });
+    User.belongsToMany(models.Project, { 
+      through: 'projects_users',
+      foreignKey: 'userId',
+      otherKey: 'projectId'
+    });
   };
 
   return User;

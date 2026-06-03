@@ -52,7 +52,8 @@ class ProjectsController {
 
     updateProject = async (req, res, next) => {
         try {
-            const { body, params: { id } } = req;  
+            const { body, params: { id } } = req;
+            const userId = req.user.id;
             
             if (!id) {
                 return res.status(400).json({ 
@@ -61,7 +62,7 @@ class ProjectsController {
                 });
             }
     
-            const updatedProject = await projectsService.updateProject(id, body); 
+            const updatedProject = await projectsService.updateProject(id, userId, body); 
             res.status(200).json({ status: "OK", data: updatedProject });
         } catch (error) {
             next(error);
@@ -71,6 +72,7 @@ class ProjectsController {
     deleteProject = async (req, res, next) => {
         try {
             const { id } = req.params;
+            const userId = req.user.id;
 
             if (!id) {
                 return res.status(400).json({ 
@@ -79,9 +81,40 @@ class ProjectsController {
                 });
             }
 
-            await projectsService.deleteProject(id);
+            await projectsService.deleteProject(id, userId);
 
             res.sendStatus(204);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    inviteUserProject = async (req, res, next) => {
+        try {
+            const { email } = req.body; 
+            const { id: projectId } = req.params; 
+            const inviter = req.user;
+
+            if (!email) {
+                return res.status(400).json({ status: "FAILED", message: "El email es requerido" });
+            }
+
+            await projectsService.inviteUserProject(email, projectId, inviter);
+
+            res.status(200).json({ status: "OK", message: "Email de invitación enviado correctamente" });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    acceptInvitation = async (req, res, next) => {
+        try {
+            const { token } = req.body;
+            const invitedUserId = req.user.id; 
+
+            await projectsService.acceptInvitation(token, invitedUserId);
+            
+            res.status(200).json({ status: "OK", message: "Invitación Aceptada" });
         } catch (error) {
             next(error);
         }
