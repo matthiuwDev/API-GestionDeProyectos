@@ -2,5 +2,11 @@ $kind: collection
 name: API - Gestión de Proyectos
 description: Collection for the Project Management API (v1)
 variables:
-  - key: baseUrl
-    value: 'http://localhost:4000'
+  baseUrl: http://localhost:4000
+  jwt_token: ""
+auth:
+  - id: 8ba8faba-a774-4f3c-ad6c-67f177ee79d0
+    type: bearer
+    name: Bearer Token
+    credentials:
+      token: "{{jwt_token}}"
