@@ -26,11 +26,6 @@ class AuthController {
       const token = generateToken(user);
 
       res
-        .cookie('access_token', token, {
-          httpOnly: true,
-          sameSite: 'strict',
-          maxAge: 1000 * 60 * 60 * 24
-        })
         .status(200)
         .json({ status: 'OK', data: user, token });
     } catch (error) {
