@@ -18,16 +18,25 @@ class ProjectsService {
     });
   };
 
-  getOneProject = async (id) => {
+  getOneProject = async (id, userId) => {
     const project = await db.Project.findByPk(id, {
-      include: {
-        model: db.UserStory,
-        include: [db.Task]
-      }
+      include: [
+        {
+          model: db.UserStory,
+          include: [db.Task]
+        },
+        {
+          model: db.User,
+          where: { id: userId },
+          attributes: ['id'],
+          through: { attributes: [] },
+          required: true // Ensures only projects where the user is a member are returned
+        }
+      ]
     });
 
     if (!project) {
-      throw new Error(`No se encontró el proyecto con ID ${id}`);
+      throw new Error(`No se encontró el proyecto con ID ${id} o no tienes acceso.`);
     }
 
     return project;
@@ -123,7 +132,7 @@ class ProjectsService {
 
     if (new Date() > invitation.expiresAt) {
       await invitation.update({
-        status: "EXPIRED"
+        status: "CONSUMED"
       })
       throw new Error('El enlace de invitación ha expirado');
     }

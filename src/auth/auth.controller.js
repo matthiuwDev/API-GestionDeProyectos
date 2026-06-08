@@ -35,7 +35,7 @@ class AuthController {
 
   userLogout = async (req, res, next) => {
     try {
-      res.clearCookie('access_token').status(200).json({ status: 'OK', message: 'Sesión cerrada exitosamente' });
+      res.status(200).json({ status: 'OK', message: 'Sesión cerrada exitosamente' });
     } catch (error) {
       next(error);
     }

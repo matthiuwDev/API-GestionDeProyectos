@@ -17,6 +17,7 @@ class ProjectsController {
     getOneProject = async (req, res, next) => {
         try {
             const { id } = req.params;
+            const userId = req.user.id;
             
             if (!id) {
                 return res.status(400).json({ 
@@ -25,7 +26,7 @@ class ProjectsController {
                 });
             }
 
-            const project = await projectsService.getOneProject(id);
+            const project = await projectsService.getOneProject(id, userId);
             res.status(200).json({ status: 'OK', data: project });
         } catch (error) {
             next(error);
