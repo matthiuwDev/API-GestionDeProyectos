@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 
 import projectsRouter from './project/projects.routes.js';
+import sprintsRouter from './sprint/sprints.routes.js';
 import taskRouter from './task/tasks.routes.js';
 import authRouter from './auth/auth.routes.js';
 import userRouter from './user/users.routes.js';
@@ -45,6 +46,7 @@ app.use('/db', dbRouter);
 
 // Rutas de app
 app.use("/api/v1/projects", projectsRouter);
+app.use("/api/v1/sprints", sprintsRouter);
 app.use("/api/v1/tasks", taskRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
