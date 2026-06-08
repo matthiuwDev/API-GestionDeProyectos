@@ -8,6 +8,7 @@ const router = Router();
 
 router
     .get('/', validateToken, sprintsController.getSprints)
-    .post('/', validateToken, validate(sprint), sprintsController.createSprint);
+    .post('/', validateToken, validate(sprint), sprintsController.createSprint)
+    .delete('/:id', validateToken, sprintsController.deleteSprint);
 
 export default router;

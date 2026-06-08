@@ -26,6 +26,11 @@ export default function (sequelize) {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    status: {
+      type: DataTypes.ENUM('PENDING', 'ACTIVE', 'COMPLETED'),
+      allowNull: false,
+      defaultValue: 'PENDING',
+    },
   }, {
     timestamps: true
   });

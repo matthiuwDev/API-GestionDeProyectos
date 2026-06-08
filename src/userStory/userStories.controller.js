@@ -4,7 +4,8 @@ class UserStoriesController {
     
     getAllUserStories = async (req, res, next) => {
         try {
-            const userStories = await userStoriesService.getAllUserStories();
+            const { projectId, sprintId } = req.query;
+            const userStories = await userStoriesService.getAllUserStories({ projectId, sprintId });
             res.status(200).json({ status: 'OK', data: userStories });
         } catch (error) {
             next(error);
