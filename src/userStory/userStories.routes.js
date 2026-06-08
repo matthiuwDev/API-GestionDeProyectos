@@ -1,13 +1,14 @@
 import { Router } from "express";
 import userStoriesController from "./userStories.controller.js";
 const router = Router();
+import { validateToken } from "../middlewares/validateToken.middleware.js";
 import { validate } from "../middlewares/validateData.middleware.js";
 import { userStory } from "./userStory.scheme.js";
 
 router
-    .get('/', userStoriesController.getAllUserStories)
-    .post('/', validate(userStory), userStoriesController.createUserStory)
-    .get('/:id', userStoriesController.getOneUserStory)
-    .delete('/:id', userStoriesController.deleteUserStory)
-    .put('/:id', userStoriesController.updateUserStory)
+    .get('/', validateToken, userStoriesController.getAllUserStories)
+    .post('/', validateToken, validate(userStory), userStoriesController.createUserStory)
+    .get('/:id', validateToken, userStoriesController.getOneUserStory)
+    .delete('/:id', validateToken, userStoriesController.deleteUserStory)
+    .put('/:id', validateToken, userStoriesController.updateUserStory)
 export default router;

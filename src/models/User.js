@@ -18,6 +18,7 @@ export default function (sequelize) {
     email: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
       isEmail: true,          
       validate: {
         notEmpty: true,
