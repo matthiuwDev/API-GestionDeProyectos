@@ -8,5 +8,6 @@ test_patterns = ["**/__tests__/**", "**/*.spec.ts", "**/*.spec.js", "**/*.test.t
   enabled = true
 
   [analyzers.meta]
-  module_system = "es-modules"
   environment = ["nodejs"]
+  module_system = "es6"
+  ecma_version = 2021
