@@ -3,8 +3,19 @@ import db from "../database/database.js";
 
 class UserStoriesService {
     
-    getAllUserStories = async () => {
-        return await db.UserStory.findAll();
+    getAllUserStories = async (filters = {}) => {
+        const where = {};
+        
+        if (filters.projectId) {
+            where.projectId = filters.projectId;
+        }
+
+        if (filters.sprintId !== undefined) {
+            // Manejar el caso de 'null' como string proveniente de query params
+            where.sprintId = filters.sprintId === 'null' ? null : filters.sprintId;
+        }
+
+        return await db.UserStory.findAll({ where });
     }
 
     getOneUserStory = async (id) => {

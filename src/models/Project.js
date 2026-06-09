@@ -29,6 +29,12 @@ export default function (sequelize) {
   });
 
   Project.associate = function (models) {
+    Project.hasMany(models.Sprint, { 
+      foreignKey: 'projectId', 
+      sourceKey: 'id', 
+      onDelete: 'CASCADE' 
+    });
+
     Project.hasMany(models.UserStory, { 
       foreignKey: 'projectId', 
       sourceKey: 'id', 
