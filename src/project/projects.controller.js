@@ -63,7 +63,7 @@ class ProjectsController {
                 });
             }
     
-            const updatedProject = await projectsService.updateProject(id, userId, body); 
+            const updatedProject = await projectsService.updateProject(id, body); 
             res.status(200).json({ status: "OK", data: updatedProject });
         } catch (error) {
             next(error);
