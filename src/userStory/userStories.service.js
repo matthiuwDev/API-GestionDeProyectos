@@ -1,5 +1,6 @@
 // src/services/userStories.service.js
 import db from "../database/database.js";
+import { NotFoundError } from "../helpers/errors.js";
 
 class UserStoriesService {
     
@@ -24,7 +25,7 @@ class UserStoriesService {
         });
         
         if (!userStory) {
-            throw new Error(`No se encontró la Historia de Usuario con ID ${id}`);
+            throw new NotFoundError(`No se encontró la Historia de Usuario con ID ${id}`);
         }
         return userStory;
     }
@@ -37,7 +38,7 @@ class UserStoriesService {
         const userStory = await db.UserStory.findByPk(id);
         
         if (!userStory) {
-            throw new Error(`No se puede actualizar: No se encontró la Historia de Usuario con ID ${id}`);
+            throw new NotFoundError(`No se puede actualizar: No se encontró la Historia de Usuario con ID ${id}`);
         }
 
         await userStory.update(changes); 
@@ -51,7 +52,7 @@ class UserStoriesService {
         });
 
         if (deletedRows === 0) {
-            throw new Error(`No se puede eliminar: No se encontró la Historia de Usuario con ID ${id}`);
+            throw new NotFoundError(`No se puede eliminar: No se encontró la Historia de Usuario con ID ${id}`);
         }
 
         return true;
