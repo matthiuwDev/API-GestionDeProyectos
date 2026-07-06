@@ -1,4 +1,5 @@
 import db from "../database/database.js";
+import { NotFoundError } from "../helpers/errors.js";
 
 class TasksService {
     getTasks = async () => {
@@ -9,7 +10,7 @@ class TasksService {
         const task = await db.Task.findByPk(id);
 
         if(!task){
-            throw new Error(`No se encontró la tarea con ID ${id}`);
+            throw new NotFoundError(`No se encontró la tarea con ID ${id}`);
         }
         return task;
     }
@@ -22,7 +23,7 @@ class TasksService {
         const task = await db.Task.findByPk(id);
 
         if(!task){
-            throw new Error(`No se puede actualizar: No se encontró la tarea con ID ${id}`);
+            throw new NotFoundError(`No se puede actualizar: No se encontró la tarea con ID ${id}`);
         }
 
         await task.update(changes);
@@ -35,7 +36,7 @@ class TasksService {
         });
 
         if (deletedRows === 0) {
-            throw new Error(`No se puede eliminar: No se encontró la tarea con ID ${id}`);
+            throw new NotFoundError(`No se puede eliminar: No se encontró la tarea con ID ${id}`);
         }
         
         return true;

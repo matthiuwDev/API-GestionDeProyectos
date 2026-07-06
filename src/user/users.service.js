@@ -1,17 +1,9 @@
 import db from "../database/database.js";
 
-class UserService{
+class UserService {
     getUsers = async () => {
-        try {
-            const users = await db.User.findAll();
-
-            return users;
-        } catch (error) {
-            throw new Error("Error al obtener los usuarios: " + error.message);
-        }
+        return await db.User.findAll();
     }
-
-    
 }
 
 export default new UserService();

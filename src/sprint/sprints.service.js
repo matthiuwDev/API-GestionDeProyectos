@@ -1,4 +1,5 @@
 import db from '../database/database.js';
+import { NotFoundError, BadRequestError, ForbiddenError } from '../helpers/errors.js';
 
 class SprintsService {
   getSprints = async (projectId, userId) => {
@@ -13,7 +14,7 @@ class SprintsService {
     });
 
     if (!project) {
-      throw new Error(`No tienes acceso al proyecto con ID ${projectId}`);
+      throw new ForbiddenError(`No tienes acceso al proyecto con ID ${projectId}`);
     }
 
     return await db.Sprint.findAll({
@@ -26,7 +27,7 @@ class SprintsService {
 
     // Validar fechas (startDate <= endDate)
     if (new Date(startDate) > new Date(endDate)) {
-      throw new Error("La fecha de inicio no puede ser posterior a la fecha de fin");
+      throw new BadRequestError("La fecha de inicio no puede ser posterior a la fecha de fin");
     }
 
     // Un solo ACTIVE por proyecto
@@ -36,7 +37,7 @@ class SprintsService {
       });
 
       if (activeSprint) {
-        throw new Error("Ya existe un sprint activo en este proyecto");
+        throw new BadRequestError("Ya existe un sprint activo en este proyecto");
       }
     }
 
@@ -47,12 +48,12 @@ class SprintsService {
     const sprint = await db.Sprint.findByPk(id);
 
     if (!sprint) {
-      throw new Error(`No se encontró el sprint con ID ${id}`);
+      throw new NotFoundError(`No se encontró el sprint con ID ${id}`);
     }
 
     // Regla 3: Impedir eliminar ACTIVE
     if (sprint.status === 'ACTIVE') {
-      throw new Error("No se puede eliminar un sprint que está activo");
+      throw new BadRequestError("No se puede eliminar un sprint que está activo");
     }
 
     await sprint.destroy();

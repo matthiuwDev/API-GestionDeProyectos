@@ -1,7 +1,8 @@
 import config from '../config/config.js';
 import db from '../database/database.js';
 import sendEmail from '../helpers/sendEmail.js';
-import crypto from 'crypto'
+import crypto from 'crypto';
+import { NotFoundError, BadRequestError } from '../helpers/errors.js';
 
 class ProjectsService {
   getProjects = async (userId) => {
@@ -36,7 +37,7 @@ class ProjectsService {
     });
 
     if (!project) {
-      throw new Error(`No se encontró el proyecto con ID ${id} o no tienes acceso.`);
+      throw new NotFoundError(`No se encontró el proyecto con ID ${id} o no tienes acceso.`);
     }
 
     return project;
@@ -65,7 +66,7 @@ class ProjectsService {
     const project = await db.Project.findByPk(projectId);
 
     if (!project) {
-      throw new Error(`Proyecto no encontrado`);
+      throw new NotFoundError(`Proyecto no encontrado`);
     }
 
     await project.update(changes);
@@ -78,7 +79,7 @@ class ProjectsService {
     });
 
     if (deletedRows === 0) {
-      throw new Error(`Proyecto no encontrado`);
+      throw new NotFoundError(`Proyecto no encontrado`);
     }
     return true;
   };
@@ -127,14 +128,14 @@ class ProjectsService {
     });
 
     if (!invitation) {
-      throw new Error('La invitación no existe o ya fue utilizada');
+      throw new NotFoundError('La invitación no existe o ya fue utilizada');
     }
 
     if (new Date() > invitation.expiresAt) {
       await invitation.update({
         status: "CONSUMED"
-      })
-      throw new Error('El enlace de invitación ha expirado');
+      });
+      throw new BadRequestError('El enlace de invitación ha expirado');
     }
 
     await db.sequelize.models.projects_users.create({

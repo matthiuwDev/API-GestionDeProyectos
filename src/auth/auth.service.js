@@ -1,5 +1,6 @@
 import db from '../database/database.js';
 import bcrypt from 'bcryptjs';
+import { NotFoundError, UnauthorizedError } from '../helpers/errors.js';
 
 class AuthService {
     
@@ -47,14 +48,14 @@ class AuthService {
 
     console.log('USER', user);
     if (!user) {
-      throw new Error('Usuario no encontrado');
+      throw new NotFoundError('Usuario no encontrado');
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     console.log('validPassword', validPassword);
 
     if (!validPassword) {
-      throw new Error('La contraseña es incorrecta');
+      throw new UnauthorizedError('La contraseña es incorrecta');
     }
 
     return {
