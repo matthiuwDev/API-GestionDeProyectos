@@ -4,7 +4,8 @@ class TasksController {
     
     getTasks = async (req, res, next) => {
         try {
-            const tasks = await tasksService.getTasks();
+            const { userStoryId } = req.query;
+            const tasks = await tasksService.getTasks({ userStoryId });
             res.status(200).json({ status: 'OK', data: tasks });
         } catch (error) {
             next(error);

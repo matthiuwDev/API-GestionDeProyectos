@@ -20,6 +20,18 @@ class SprintsController {
         }
     }
 
+    getSprintById = async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+
+            const sprint = await sprintsService.getSprintById(id, userId);
+            res.status(200).json({ status: 'OK', data: sprint });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     createSprint = async (req, res, next) => {
         try {
             const { body } = req;
@@ -34,7 +46,7 @@ class SprintsController {
                 projectId: body.projectId // Aseguramos que venga del body
             };
 
-            const createdSprint = await sprintsService.createSprint(sprintData);
+            const createdSprint = await sprintsService.createSprint(sprintData, userId);
             res.status(201).json({ status: "CREATED", data: createdSprint });
         } catch (error) {
             next(error);

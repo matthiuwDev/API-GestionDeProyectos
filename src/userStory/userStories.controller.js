@@ -4,8 +4,8 @@ class UserStoriesController {
     
     getAllUserStories = async (req, res, next) => {
         try {
-            const { projectId, sprintId } = req.query;
-            const userStories = await userStoriesService.getAllUserStories({ projectId, sprintId });
+            const { projectId, sprintId, includeTasks } = req.query;
+            const userStories = await userStoriesService.getAllUserStories({ projectId, sprintId, includeTasks });
             res.status(200).json({ status: 'OK', data: userStories });
         } catch (error) {
             next(error);
