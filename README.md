@@ -12,6 +12,7 @@
 - **Framework Web:** [Express.js](https://expressjs.com/) (v4)
 - **Base de Datos:** [PostgreSQL](https://www.postgresql.org/)
 - **ORM:** [Sequelize](https://sequelize.org/)
+- **Contenedores:** Docker & Docker Compose
 - **Autenticación:** JSON Web Tokens (JWT) & bcryptjs
 - **Seguridad:** Helmet, CORS, HPP
 
@@ -19,7 +20,7 @@
 
 ## 🏗️ Arquitectura del Sistema
 
-Actualmente, el proyecto está estructurado como un **Monolito Modular** siguiendo el patrón de **Screaming Architecture**. En lugar de organizar el código por capas técnicas genéricas (controladores, servicios), el código está agrupado por **Dominios de Negocio**:
+Actualmente, el proyecto está estructurado como un **Monolito Modular** siguiendo el patrón de **Screaming Architecture**. El código está agrupado por **Dominios de Negocio**:
 
 - 🔐 `auth/` - Autenticación y registro de usuarios.
 - 📁 `project/` - Gestión de proyectos e invitaciones.
@@ -39,35 +40,62 @@ Esta organización facilita encontrar la lógica de negocio y prepara el terreno
 
 ## 🚀 Instalación y Ejecución Local
 
+Para garantizar que tu entorno de desarrollo funcione sin fricciones de configuración, la API ya está **completamente configurada con Docker**. 
+
 ### Prerrequisitos
-- Node.js (v18 o superior)
-- PostgreSQL corriendo localmente o en un contenedor Docker.
+- [Docker](https://www.docker.com/) y **Docker Compose** instalados en tu máquina.
 
-### Pasos
+### Configuración de Variables de Entorno
+Antes de levantar los contenedores, debes configurar tus variables de entorno, incluyendo las credenciales iniciales de administrador:
 
-1. **Clonar el repositorio y acceder a la carpeta:**
-   ```bash
-   git clone <url-del-repositorio>
-   cd API-GestionDeProyectos
-   ```
+```bash
+cp .env.example .env
+```
 
-2. **Instalar dependencias:**
-   ```bash
-   npm install
-   ```
+Asegúrate de llenar en tu `.env` las siguientes variables clave (necesarias para la base de datos y la sincronización inicial):
+```env
+PGHOST=db           # Nombre del servicio en docker-compose
+PGUSER=postgres
+PGPASSWORD=tu_password
+PGDATABASE=gestion_proyectos
 
-3. **Configurar Variables de Entorno:**
-   Copia el archivo de ejemplo y configura tus credenciales locales:
-   ```bash
-   cp .env.example .env
-   ```
-   *Asegúrate de llenar los datos de conexión a la base de datos PostgreSQL (`PGUSER`, `PGPASSWORD`, `PGDATABASE`, etc.) y tu `SECRET_JWT_KEY`.*
+# Usuarios Administradores Iniciales
+ADMIN_EMAILS=admin1@test.com,admin2@test.com
+ADMIN_PASSWORD=PasswordSeguro123!
+```
 
-4. **Ejecutar el entorno de desarrollo:**
-   ```bash
-   npm run dev
-   ```
-   El servidor arrancará (por defecto en el puerto 3000) usando `nodemon` y sincronizará los modelos de Sequelize con la base de datos automáticamente (verificar `src/database/database.js`).
+### Ejecución con Docker
+
+Levanta la base de datos de PostgreSQL y la API en un solo paso ejecutando:
+
+```bash
+docker-compose up -d --build
+```
+*Tu servidor Express quedará escuchando automáticamente en el puerto mapeado en el `docker-compose.yml` (por defecto `3000`).*
+
+---
+
+## 🗄️ Sincronización de Datos y Carga Inicial
+
+En este proyecto, no necesitas ejecutar complejas migraciones manuales en el entorno de desarrollo. 
+
+### 1. Sincronización Dinámica (`database.js`)
+El archivo principal de configuración del ORM, [`src/database/database.js`](file:///c:/Proyectos/MATEO/API-GestionDeProyectos/src/database/database.js), está diseñado para leer dinámicamente tu carpeta de modelos e importarlos, generando y relacionando todas las tablas en tiempo de ejecución. 
+
+### 2. Endpoint de Sincronización y "Semillas" (`db.js`)
+Para facilitar la inyección de los datos iniciales, el helper [`src/helpers/db.js`](file:///c:/Proyectos/MATEO/API-GestionDeProyectos/src/helpers/db.js) expone un endpoint útil.
+
+Puedes ejecutar la sincronización forzada e inyectar a los **administradores iniciales** definidos en tu archivo `.env` enviando una petición POST al endpoint con la bandera `CREATE_ADMINS`:
+
+**Endpoint:**
+```http
+POST http://localhost:3000/db/sync?flag=CREATE_ADMINS
+```
+
+**Comportamiento:**
+1. Sequelize sincronizará todas las tablas (`alter: true`).
+2. El script leerá las variables `ADMIN_EMAILS` y `ADMIN_PASSWORD`.
+3. Creará los perfiles con el rol `ADMIN` en la base de datos, ignorando automáticamente aquellos que ya existan.
 
 ---
 
