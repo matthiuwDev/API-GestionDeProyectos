@@ -6,6 +6,7 @@ class UserStoriesService {
     
     getAllUserStories = async (filters = {}) => {
         const where = {};
+        const queryOptions = { where };
         
         if (filters.projectId) {
             where.projectId = filters.projectId;
@@ -16,7 +17,11 @@ class UserStoriesService {
             where.sprintId = filters.sprintId === 'null' ? null : filters.sprintId;
         }
 
-        return await db.UserStory.findAll({ where });
+        if (filters.includeTasks === 'true' || filters.includeTasks === true) {
+            queryOptions.include = [db.Task];
+        }
+
+        return await db.UserStory.findAll(queryOptions);
     }
 
     getOneUserStory = async (id) => {

@@ -22,8 +22,26 @@ class SprintsService {
     });
   };
 
-  createSprint = async (newSprintData) => {
+  getSprintById = async (id, userId) => {
+    const sprint = await db.Sprint.findByPk(id);
+    if (!sprint) {
+      throw new NotFoundError(`No se encontró el sprint con ID ${id}`);
+    }
+    return sprint;
+  }
+
+  createSprint = async (newSprintData, userId) => {
     const { projectId, status, startDate, endDate } = newSprintData;
+
+    //Validación de acceso al proyecto
+    const project = await db.Project.findByPk(projectId, {
+      include: {
+        model: db.User,
+        where: { id: userId },
+        through: { attributes: [] },
+        required: true
+      }
+    });
 
     // Validar fechas (startDate <= endDate)
     if (new Date(startDate) > new Date(endDate)) {
