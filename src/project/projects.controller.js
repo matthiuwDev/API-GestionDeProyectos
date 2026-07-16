@@ -33,6 +33,25 @@ class ProjectsController {
         }
     }
     
+
+    getProjectUsers = async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            
+            if (!id) {
+                return res.status(400).json({ 
+                    status: "FAILED", 
+                    data: { error: "El parámetro ':id' no puede estar vacío" } 
+                });
+            }
+
+            const project = await projectsService.getProjectUsersInvitations(id);
+            res.status(200).json({ status: 'OK', data: project });
+        } catch (error) {
+            next(error);
+        }
+    }
+    
     createProject = async (req, res, next) => {
         try {
             const { body } = req;

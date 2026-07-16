@@ -5,6 +5,15 @@ import crypto from 'crypto';
 import { NotFoundError, BadRequestError } from '../helpers/errors.js';
 
 class ProjectsService {
+  //Verificar estado de la invitación
+  isInvitationActive(invitation) {
+    return (
+      invitation &&
+      invitation.status === 'PENDING' &&
+      invitation.expiresAt > new Date()
+    );
+  }
+
   getProjects = async (userId) => {
     return await db.Project.findAll({
       include: {
@@ -12,8 +21,7 @@ class ProjectsService {
         attributes: ['id', 'name', 'email'],
         where: { id: userId },
         through: {
-          attributes: ['role', 'status'],
-          where: { status: 'ACCEPTED' }
+          attributes: ['role']
         }
       }
     });
@@ -31,7 +39,7 @@ class ProjectsService {
           where: { id: userId },
           attributes: ['id'],
           through: { attributes: [] },
-          required: true // Ensures only projects where the user is a member are returned
+          required: true
         }
       ]
     });
@@ -43,6 +51,77 @@ class ProjectsService {
     return project;
   };
 
+  // getProjectUsersInvitations = async (id) => {
+  //   const userInvitations = await db.Invitation.findAll({
+  //     where: { projectId: id },
+  //     attributes: ['id', 'email', 'status', 'createdAt', 'expiresAt']
+  //   });
+
+  //   return userInvitations;
+  // };
+
+  // Método para obtener los usuarios existentes del proyecto y sus invitaciones (Incluyendo nombres)
+  getProjectUsersInvitations = async (id) => {
+    const project = await db.Project.findByPk(id, {
+      include: {
+        model: db.User,
+        through: { attributes: ['role'] },
+        attributes: ['email', 'name']
+      }
+    });
+
+    if (!project) throw new NotFoundError('Proyecto no encontrado');
+
+    const activeMembers = project.users.map((user) => ({
+      email: user.email,
+      status: 'CONSUMED',
+      createdAt: user.projects_users.createdAt,
+      expiresAt: null,
+      name: user.name,
+      canResend: false,
+      role: user.projects_users.role
+    }));
+    console.log('Active Members:', activeMembers);
+
+    const userInvitations = await db.Invitation.findAll({
+      where: { 
+        projectId: id,
+        status: ['PENDING', 'EXPIRED']
+      },
+      attributes: ['id', 'email', 'status', 'createdAt', 'expiresAt'],
+      raw: true
+    });
+
+    let mappedInvitations = [];
+    
+    if (userInvitations.length > 0) {
+      const emailsToSearch = userInvitations.map((inv) => inv.email);
+
+      const existingUsers = await db.User.findAll({
+        where: { email: emailsToSearch },
+        attributes: ['email', 'name'],
+        raw: true
+      });
+
+      const userMap = {};
+      existingUsers.forEach((user) => {
+        userMap[user.email] = user.name;
+      });
+
+      mappedInvitations = userInvitations.map((invitation) => {
+        const isActive = this.isInvitationActive(invitation);
+
+        return {
+          ...invitation,
+          name: userMap[invitation.email] || 'Usuario no registrado',
+          canResend: !isActive
+        };
+      });
+    }
+
+    return [...activeMembers, ...mappedInvitations];
+  };
+
   createProject = async (newProject) => {
     const transaction = await db.sequelize.transaction();
 
@@ -50,7 +129,7 @@ class ProjectsService {
       const project = await db.Project.create(newProject, { transaction });
 
       await project.addUser(newProject.userId, {
-        through: { role: 'OWNER', status: 'ACCEPTED' },
+        through: { role: 'OWNER' },
         transaction
       });
 
@@ -85,25 +164,55 @@ class ProjectsService {
   };
 
   inviteUserProject = async (userEmail, projectId, inviter) => {
-    const verificationToken = crypto.randomBytes(40).toString('hex');
+    const existingUser = await db.User.findOne({ where: { email: userEmail } });
     
+    if (existingUser) {
+      const isMember = await db.sequelize.models.projects_users.findOne({
+        where: { projectId, userId: existingUser.id }
+      });
+      
+      if (isMember) {
+        throw new BadRequestError('El usuario ya es miembro de este proyecto.');
+      }
+    }
+
+    const invitation = await db.Invitation.findOne({
+      where: {
+        email: userEmail,
+        projectId
+      }
+    });
+
+    const isActive = this.isInvitationActive(invitation);
+
+    if (isActive) {
+      throw new BadRequestError('Ya existe una invitación vigente para este usuario.');
+    }
+
+    const verificationToken = crypto.randomBytes(40).toString('hex');
+
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1);
 
-    const userBody = {
-      email: userEmail,
-      projectId: projectId,
-      status: "PENDING",
-      token: verificationToken,
-      expiresAt: expiresAt
-    }
-    console.log("userBody: ", userBody);
+    let invitedUser;
 
-    const invitedUser = await db.Invitation.create(userBody);
-    console.log("invitedUser: ", invitedUser);
+    if (!invitation) {
+      invitedUser = await db.Invitation.create({
+        email: userEmail,
+        projectId,
+        status: 'PENDING',
+        token: verificationToken,
+        expiresAt
+      });
+    } else {
+      invitation.status = 'PENDING';
+      invitation.token = verificationToken;
+      invitation.expiresAt = expiresAt;
+
+      invitedUser = await invitation.save();
+    }
 
     const project = await db.Project.findByPk(projectId);
-    console.log("project: ", project);
 
     await sendEmail({
       to: invitedUser.email,
@@ -117,11 +226,13 @@ class ProjectsService {
         actionUrl: `${config.URL_WEB}/#/activate/${verificationToken}`
       }
     });
-  }
+
+    return invitedUser;
+  };
 
   acceptInvitation = async (token, userId) => {
     const invitation = await db.Invitation.findOne({
-      where: { 
+      where: {
         token: token,
         status: 'PENDING'
       }
@@ -133,7 +244,7 @@ class ProjectsService {
 
     if (new Date() > invitation.expiresAt) {
       await invitation.update({
-        status: "CONSUMED"
+        status: 'EXPIRED'
       });
       throw new BadRequestError('El enlace de invitación ha expirado');
     }
@@ -141,14 +252,13 @@ class ProjectsService {
     await db.sequelize.models.projects_users.create({
       projectId: invitation.projectId,
       userId: userId,
-      role: 'GUEST',
-      status: 'ACCEPTED'
+      role: 'GUEST'
     });
 
     await invitation.update({ status: 'CONSUMED' });
 
     return true;
-  }
+  };
 }
 
 export default new ProjectsService();
