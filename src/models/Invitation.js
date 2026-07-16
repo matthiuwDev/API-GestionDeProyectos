@@ -23,7 +23,9 @@ export default function (sequelize) {
       allowNull: false
     },
     status: {
-      type: DataTypes.ENUM('PENDING', 'CONSUMED'),
+      type: DataTypes.ENUM('PENDING', 'CONSUMED', 'EXPIRED'),
+      allowNull: false,
+      defaultValue: 'PENDING'
     },
   }, {
     timestamps: true

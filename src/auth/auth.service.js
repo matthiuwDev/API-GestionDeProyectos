@@ -24,8 +24,7 @@ class AuthService {
             {
               projectId: invitation.projectId,
               userId: newUser.id,
-              role: 'GUEST',
-              status: 'ACCEPTED'
+              role: 'GUEST'
             },
             { transaction }
           );
