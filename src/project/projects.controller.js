@@ -139,6 +139,21 @@ class ProjectsController {
             next(error);
         }
     }
+
+    validateInvitation = async (req, res, next) => {
+        try {
+            const { token } = req.params;
+            
+            if (!token) {
+                return res.status(400).json({ status: "FAILED", message: "El token es requerido" });
+            }
+
+            const data = await projectsService.validateInvitationToken(token);
+            res.status(200).json({ status: "OK", data });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default new ProjectsController();
