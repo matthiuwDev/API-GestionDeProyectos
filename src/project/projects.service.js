@@ -38,7 +38,7 @@ class ProjectsService {
           model: db.User,
           where: { id: userId },
           attributes: ['id'],
-          through: { attributes: [] },
+          through: { attributes: ['role'] },
           required: true
         }
       ]
@@ -126,6 +126,10 @@ class ProjectsService {
     const transaction = await db.sequelize.transaction();
 
     try {
+      const rolUser = await db.User.findByPk(newProject.userId);
+      if ( rolUser.role !== 'ADMIN') {
+        throw new BadRequestError('No cuenta con permisos para crear un proyecto');
+      }
       const project = await db.Project.create(newProject, { transaction });
 
       await project.addUser(newProject.userId, {
@@ -223,11 +227,43 @@ class ProjectsService {
         userName: userEmail.split('@')[0],
         inviterName: inviter.name,
         projectName: project.name,
-        actionUrl: `${config.URL_WEB}/#/activate/${verificationToken}`
+        actionUrl: `${config.URL_WEB}/activate/${verificationToken}`
       }
     });
 
+    console.log(`Email de invitación enviado a ${invitedUser.email}`);
     return invitedUser;
+  };
+
+  validateInvitationToken = async (token) => {
+    const invitation = await db.Invitation.findOne({
+      where: { token },
+    });
+    console.log('INVITATION', invitation);
+
+    if (!invitation || invitation.status !== 'PENDING') {
+      throw new BadRequestError('La invitación es inválida o ya fue utilizada');
+    }
+
+    if (new Date() > invitation.expiresAt) {
+      await invitation.update({ status: 'EXPIRED' });
+      throw new BadRequestError('El enlace de invitación ha expirado');
+    }
+
+    const existingUser = await db.User.findOne({
+      where: { email: invitation.email },
+      attributes: ['id']
+    });
+    console.log('EXISTING USER', existingUser);
+
+    return {
+      isValid: true,
+      email: invitation.email,
+      project: {
+        id: invitation.projectId,
+      },
+      userExists: !!existingUser
+    };
   };
 
   acceptInvitation = async (token, userId) => {
@@ -247,6 +283,11 @@ class ProjectsService {
         status: 'EXPIRED'
       });
       throw new BadRequestError('El enlace de invitación ha expirado');
+    }
+
+    const user = await db.User.findByPk(userId);
+    if (!user || user.email !== invitation.email) {
+      throw new BadRequestError('Esta invitación fue enviada a otro correo electrónico.');
     }
 
     await db.sequelize.models.projects_users.create({

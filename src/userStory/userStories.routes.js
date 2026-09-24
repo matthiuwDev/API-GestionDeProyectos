@@ -1,14 +1,17 @@
 import { Router } from "express";
 import userStoriesController from "./userStories.controller.js";
-const router = Router();
 import { validateToken } from "../middlewares/validateToken.middleware.js";
+import { requireProjectRole, checkUserStoryUpdatePermissions } from "../middlewares/verifyRole.middleware.js";
 import { validate } from "../middlewares/validateData.middleware.js";
 import { userStory } from "./userStory.scheme.js";
 
+const router = Router();
+
 router
-    .get('/', validateToken, userStoriesController.getAllUserStories)
-    .post('/', validateToken, validate(userStory), userStoriesController.createUserStory)
-    .get('/:id', validateToken, userStoriesController.getOneUserStory)
-    .delete('/:id', validateToken, userStoriesController.deleteUserStory)
-    .put('/:id', validateToken, userStoriesController.updateUserStory)
+    .get('/', validateToken, requireProjectRole(['OWNER', 'GUEST']), userStoriesController.getAllUserStories)
+    .get('/:id', validateToken, requireProjectRole(['OWNER', 'GUEST']), userStoriesController.getOneUserStory)
+    .post('/', validateToken, requireProjectRole(['OWNER']), validate(userStory), userStoriesController.createUserStory)
+    .delete('/:id', validateToken, requireProjectRole(['OWNER']), userStoriesController.deleteUserStory)
+    .put('/:id', validateToken, requireProjectRole(['OWNER', 'GUEST']), checkUserStoryUpdatePermissions(), userStoriesController.updateUserStory)
+
 export default router;

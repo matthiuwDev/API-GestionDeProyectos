@@ -53,6 +53,18 @@ class SprintsController {
         }
     };
 
+    updateSprint = async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { body } = req;
+
+            const updatedSprint = await sprintsService.updateSprint(id, body);
+            res.status(200).json({ status: "OK", data: updatedSprint });
+        } catch (error) {
+            next(error);
+        }
+    };
+
     deleteSprint = async (req, res, next) => {
         try {
             const { id } = req.params;

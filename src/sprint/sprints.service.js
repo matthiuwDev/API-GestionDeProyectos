@@ -62,6 +62,17 @@ class SprintsService {
     return await db.Sprint.create(newSprintData);
   };
 
+  updateSprint = async (id, updatedSprintData) => {
+    const sprint = await db.Sprint.findByPk(id);
+
+    if (!sprint) {
+      throw new NotFoundError(`Sprint no encontrado`);
+    }
+
+    await sprint.update(updatedSprintData);
+    return sprint;
+  }
+
   deleteSprint = async (id) => {
     const sprint = await db.Sprint.findByPk(id);
 
