@@ -6,6 +6,6 @@ import { requireGlobalRole } from "../middlewares/verifyRole.middleware.js";
 const router = Router();
 
 router
-    .get('/', validateToken, requireGlobalRole(['ADMIN']), userController.getUsers)
+    .get('/:projectId', validateToken, requireGlobalRole(['ADMIN', 'USER']), userController.getUsers)
 
 export default router;
