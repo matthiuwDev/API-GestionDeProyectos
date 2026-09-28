@@ -6,5 +6,6 @@ export const userStory = Joi.object({
     description: Joi.string().allow(null, ''),
     projectId: Joi.number().required(),
     sprintId: Joi.number().allow(null),
-    position: Joi.number().allow(null)
+    position: Joi.number().allow(null),
+    assigneeId: Joi.number().allow(null)
 });

@@ -1,6 +1,6 @@
 // src/services/userStories.service.js
 import db from "../database/database.js";
-import { NotFoundError } from "../helpers/errors.js";
+import { NotFoundError, BadRequestError } from "../helpers/errors.js";
 
 class UserStoriesService {
     
@@ -35,7 +35,25 @@ class UserStoriesService {
         return userStory;
     }
 
+    _validateAssigneeMembership = async (assigneeId, projectId) => {
+        const isMember = await db.ProjectUsers.findOne({
+            where: {
+                userId: assigneeId,
+                projectId
+            }
+        });
+
+        if (!isMember) {
+            throw new BadRequestError(
+                `El usuario con ID ${assigneeId} no es miembro del proyecto`
+            );
+        }
+    }
+
     createUserStory = async (data) => {
+        if (data.assigneeId) {
+            await this._validateAssigneeMembership(data.assigneeId, data.projectId);
+        }
         return await db.UserStory.create(data);
     }
 
@@ -44,6 +62,10 @@ class UserStoriesService {
         
         if (!userStory) {
             throw new NotFoundError(`No se puede actualizar: No se encontró la Historia de Usuario con ID ${id}`);
+        }
+
+        if (changes.assigneeId) {
+            await this._validateAssigneeMembership(changes.assigneeId, userStory.projectId);
         }
 
         await userStory.update(changes); 

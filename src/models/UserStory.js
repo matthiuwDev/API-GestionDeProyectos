@@ -29,6 +29,7 @@ export default function (sequelize) {
   UserStory.associate = function (models) {
     UserStory.belongsTo(models.Project, { foreignKey: 'projectId', targetId: 'id' });
     UserStory.belongsTo(models.Sprint, { foreignKey: 'sprintId', targetId: 'id' });
+    UserStory.belongsTo(models.User, { foreignKey: 'assigneeId', as: 'assignee', targetId: 'id' });
     UserStory.hasMany(models.Task, { foreignKey: 'userStoryId', sourceKey: 'id', onDelete: 'CASCADE' });
   };
 

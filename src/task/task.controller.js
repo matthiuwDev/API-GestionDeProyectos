@@ -37,7 +37,8 @@ class TasksController {
             const newTask = {
                 name: body.name,
                 status: body.status || 'TODO', 
-                userStoryId: body.userStoryId 
+                userStoryId: body.userStoryId ,
+                assigneeId: body.assigneeId,
             };
 
             const createdTask = await tasksService.createTask(newTask);
