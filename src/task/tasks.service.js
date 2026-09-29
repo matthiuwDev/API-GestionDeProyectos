@@ -7,11 +7,16 @@ class TasksService {
     if (filter.userStoryId) {
       where.userStoryId = filter.userStoryId;
     }
-    return await db.Task.findAll({ where });
+    return await db.Task.findAll({ 
+      where,
+      include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }]
+    });
   };
 
   getOneTask = async (id) => {
-    const task = await db.Task.findByPk(id);
+    const task = await db.Task.findByPk(id, {
+      include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }]
+    });
 
     if (!task) {
       throw new NotFoundError(`No se encontró la tarea con ID ${id}`);

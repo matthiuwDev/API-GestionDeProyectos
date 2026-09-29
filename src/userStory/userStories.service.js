@@ -18,7 +18,12 @@ class UserStoriesService {
         }
 
         if (filters.includeTasks === 'true' || filters.includeTasks === true) {
-            queryOptions.include = [db.Task];
+            queryOptions.include = [
+                { model: db.Task, include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }] },
+                { model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }
+            ];
+        } else {
+            queryOptions.include = [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }];
         }
 
         return await db.UserStory.findAll(queryOptions);
@@ -26,7 +31,10 @@ class UserStoriesService {
 
     getOneUserStory = async (id) => {
         const userStory = await db.UserStory.findByPk(id, {
-            include: [db.Task]
+            include: [
+                { model: db.Task, include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }] },
+                { model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }
+            ]
         });
         
         if (!userStory) {
