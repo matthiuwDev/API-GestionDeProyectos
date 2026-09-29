@@ -1,6 +1,7 @@
 // src/services/userStories.service.js
 import db from "../database/database.js";
 import { NotFoundError, BadRequestError } from "../helpers/errors.js";
+import { sendAssignmentNotification } from "../helpers/notifications.js";
 
 class UserStoriesService {
     
@@ -58,26 +59,52 @@ class UserStoriesService {
         }
     }
 
-    createUserStory = async (data) => {
+
+
+    createUserStory = async (data, currentUser) => {
         if (data.assigneeId) {
             await this._validateAssigneeMembership(data.assigneeId, data.projectId);
         }
-        return await db.UserStory.create(data);
+        
+        const newUserStory = await db.UserStory.create(data);
+
+        if (data.assigneeId) {
+            await sendAssignmentNotification(
+                data.assigneeId, 
+                currentUser.name, 
+                data.name, 
+                'Historia de Usuario', 
+                data.projectId
+            );
+        }
+
+        return newUserStory;
     }
 
-    updateUserStory = async (id, changes) => {
+    updateUserStory = async (id, changes, currentUser) => {
         const userStory = await db.UserStory.findByPk(id);
         
         if (!userStory) {
             throw new NotFoundError(`No se puede actualizar: No se encontró la Historia de Usuario con ID ${id}`);
         }
 
-        if (changes.assigneeId) {
+        if (changes.assigneeId && changes.assigneeId !== userStory.assigneeId) {
             await this._validateAssigneeMembership(changes.assigneeId, userStory.projectId);
         }
 
+        const oldAssigneeId = userStory.assigneeId;
         await userStory.update(changes); 
         
+        if (changes.assigneeId && changes.assigneeId !== oldAssigneeId) {
+            await sendAssignmentNotification(
+                changes.assigneeId,
+                currentUser.name,
+                userStory.name,
+                'Historia de Usuario',
+                userStory.projectId
+            );
+        }
+
         return userStory; 
     }
 

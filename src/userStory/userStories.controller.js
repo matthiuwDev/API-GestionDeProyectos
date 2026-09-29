@@ -25,7 +25,8 @@ class UserStoriesController {
     createUserStory = async (req, res, next) => {
         try {
             const { body } = req;
-            const createdStory = await userStoriesService.createUserStory(body);
+            const { user } = req;
+            const createdStory = await userStoriesService.createUserStory(body, user);
             res.status(201).json({ status: "CREATED", data: createdStory });
         } catch (error) {
             next(error);
@@ -34,7 +35,7 @@ class UserStoriesController {
 
     updateUserStory = async (req, res, next) => {
         try {
-            const { body, params: { id } } = req;  
+            const { body, params: { id }, user } = req;  
             
             if (!id) {
                 return res.status(400).json({ 
@@ -43,7 +44,7 @@ class UserStoriesController {
                 });
             }
     
-            const updatedStory = await userStoriesService.updateUserStory(id, body); 
+            const updatedStory = await userStoriesService.updateUserStory(id, body, user); 
             res.status(200).json({ status: "OK", data: updatedStory });
         } catch (error) {
             next(error);

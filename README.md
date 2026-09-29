@@ -35,6 +35,7 @@ Esta organización facilita encontrar la lógica de negocio y prepara el terreno
 - **Manejo de Errores Global:** Sistema centralizado mediante clases tipificadas (`NotFoundError`, `BadRequestError`, etc.) que captura excepciones de la lógica de negocio y traduce automáticamente errores de Sequelize, asegurando respuestas JSON estandarizadas.
 - **Middlewares de Seguridad:** Validación de tokens, protección de cabeceras HTTP y sanitización básica.
 - **Transacciones de Base de Datos:** Operaciones complejas (como la creación de un proyecto y la asignación del rol de propietario) se ejecutan bajo transacciones ACID para evitar inconsistencias.
+- **Asignaciones y Notificaciones:** Asignación opcional de usuarios a Historias de Usuario y Tareas, con validación de membresía en proyectos y notificaciones automáticas por correo electrónico mediante plantillas HTML.
 
 ---
 
