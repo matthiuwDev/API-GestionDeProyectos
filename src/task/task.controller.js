@@ -32,15 +32,16 @@ class TasksController {
 
     createTask = async (req, res, next) => {
         try {
-            const { body } = req;
+            const { body, user } = req;
             
             const newTask = {
                 name: body.name,
                 status: body.status || 'TODO', 
-                userStoryId: body.userStoryId 
+                userStoryId: body.userStoryId ,
+                assigneeId: body.assigneeId,
             };
 
-            const createdTask = await tasksService.createTask(newTask);
+            const createdTask = await tasksService.createTask(newTask, user);
             res.status(201).json({ status: "CREATED", data: createdTask });
         } catch (error) {
             next(error);
@@ -49,7 +50,7 @@ class TasksController {
 
     updateTask = async (req, res, next) => {
         try {
-            const { body, params: { id } } = req;
+            const { body, params: { id }, user } = req;
 
             if (!id) {
                 return res.status(400).json({ 
@@ -58,7 +59,7 @@ class TasksController {
                 });
             }
 
-            const updatedTask = await tasksService.updateTask(id, body);
+            const updatedTask = await tasksService.updateTask(id, body, user);
             res.status(200).json({ status: "OK", data: updatedTask });
         } catch (error) {
             next(error);

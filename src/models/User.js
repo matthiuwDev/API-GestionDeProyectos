@@ -60,6 +60,8 @@ export default function (sequelize) {
       foreignKey: 'userId',
       otherKey: 'projectId'
     });
+    User.hasMany(models.UserStory, { foreignKey: 'assigneeId', as: 'assignedStories', sourceKey: 'id', onDelete: 'SET NULL' });
+    User.hasMany(models.Task, { foreignKey: 'assigneeId', as: 'assignedTasks', sourceKey: 'id', onDelete: 'SET NULL' });
   };
 
   return User;

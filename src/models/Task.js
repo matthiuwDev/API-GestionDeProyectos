@@ -20,6 +20,7 @@ export default function (sequelize) {
 
   Task.associate = function (models) {
     Task.belongsTo(models.UserStory, { foreignKey: 'userStoryId', targetId: 'id' });
+    Task.belongsTo(models.User, { foreignKey: 'assigneeId', as: 'assignee', targetId: 'id' });
   };
 
   return Task;
