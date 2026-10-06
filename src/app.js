@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import crypto from 'crypto';
+globalThis.crypto = crypto;
 
 import projectsRouter from './project/projects.routes.js';
 import sprintsRouter from './sprint/sprints.routes.js';
