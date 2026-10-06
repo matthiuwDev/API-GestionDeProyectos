@@ -1,6 +1,7 @@
 import db from '../database/database.js';
 import { NotFoundError, BadRequestError } from '../helpers/errors.js';
 import { sendAssignmentNotification } from '../helpers/notifications.js';
+import { logActivity } from '../helpers/activityLogger.js';
 
 class TasksService {
   getTasks = async (filter = {}) => {
@@ -52,9 +53,9 @@ class TasksService {
     }
     
     const createdTask = await db.Task.create(newTask);
+    const userStory = await db.UserStory.findByPk(newTask.userStoryId);
 
     if (newTask.assigneeId && currentUser) {
-      const userStory = await db.UserStory.findByPk(newTask.userStoryId);
       await sendAssignmentNotification(
         newTask.assigneeId,
         currentUser.name,
@@ -63,6 +64,18 @@ class TasksService {
         userStory.projectId
       );
     }
+    console.log('Tareita:', createdTask.toJSON());
+
+    // Registro de actividad en MongoDB
+    await logActivity({
+      action: 'CREATE',
+      entity: 'Task',
+      entityId: createdTask.id,
+      projectId: userStory.projectId,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      snapshot: createdTask.toJSON()
+    });
 
     return createdTask;
   };
@@ -81,8 +94,8 @@ class TasksService {
     const oldAssigneeId = task.assigneeId;
     await task.update(changes);
 
+    const userStory = await db.UserStory.findByPk(task.userStoryId);
     if (changes.assigneeId && changes.assigneeId !== oldAssigneeId && currentUser) {
-      const userStory = await db.UserStory.findByPk(task.userStoryId);
       await sendAssignmentNotification(
         changes.assigneeId,
         currentUser.name,
@@ -92,17 +105,38 @@ class TasksService {
       );
     }
 
+    await logActivity({
+      action: 'UPDATE',
+      entity: 'Task',
+      entityId: task.id,
+      projectId: userStory.projectId,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      changes: changes,
+    });
+
     return task;
   };
 
-  deleteTask = async (id) => {
-    const deletedRows = await db.Task.destroy({
-      where: { id }
-    });
+  deleteTask = async (id, currentUser) => {
+    const task = await db.Task.findByPk(id);
 
-    if (deletedRows === 0) {
+    if (!task) {
       throw new NotFoundError(`No se puede eliminar: No se encontró la tarea con ID ${id}`);
     }
+
+    const userStory = await db.UserStory.findByPk(task.userStoryId);
+
+    await task.destroy();
+
+    await logActivity({
+      action: 'DELETE',
+      entity: 'Task',
+      entityId: task.id,
+      projectId: userStory.projectId,
+      userId: currentUser.id,
+      userName: currentUser.name,
+    });
 
     return true;
   };
