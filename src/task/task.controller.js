@@ -37,7 +37,7 @@ class TasksController {
             const newTask = {
                 name: body.name,
                 status: body.status || 'TODO', 
-                userStoryId: body.userStoryId ,
+                userStoryId: body.userStoryId,
                 assigneeId: body.assigneeId,
             };
 
@@ -68,7 +68,7 @@ class TasksController {
 
     deleteTask = async (req, res, next) => {
         try {
-            const { id } = req.params;
+            const { params: { id }, user } = req;
 
             if (!id) {
                 return res.status(400).json({ 
@@ -77,7 +77,7 @@ class TasksController {
                 });
             }
 
-            await tasksService.deleteTask(id);
+            await tasksService.deleteTask(id, user);
             res.sendStatus(204);
         } catch (error) {
             next(error);
