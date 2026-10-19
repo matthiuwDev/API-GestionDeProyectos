@@ -35,18 +35,14 @@ class SprintsController {
     createSprint = async (req, res, next) => {
         try {
             const { body } = req;
-            const userId = req.user.id;
+            const currentUser = req.user;
 
-            // Verificar acceso al proyecto antes de crear el sprint
-            // (El service ya lo hace en getSprints, pero aquí lo haremos implícitamente o el service debería validarlo)
-            // Para seguir el patrón de Project, el controller prepara el objeto y el service lo crea.
-            
             const sprintData = {
                 ...body,
-                projectId: body.projectId // Aseguramos que venga del body
+                projectId: body.projectId 
             };
 
-            const createdSprint = await sprintsService.createSprint(sprintData, userId);
+            const createdSprint = await sprintsService.createSprint(sprintData, currentUser);
             res.status(201).json({ status: "CREATED", data: createdSprint });
         } catch (error) {
             next(error);
@@ -57,8 +53,9 @@ class SprintsController {
         try {
             const { id } = req.params;
             const { body } = req;
+            const currentUser = req.user;
 
-            const updatedSprint = await sprintsService.updateSprint(id, body);
+            const updatedSprint = await sprintsService.updateSprint(id, body, currentUser);
             res.status(200).json({ status: "OK", data: updatedSprint });
         } catch (error) {
             next(error);
@@ -68,7 +65,9 @@ class SprintsController {
     deleteSprint = async (req, res, next) => {
         try {
             const { id } = req.params;
-            const result = await sprintsService.deleteSprint(id);
+            const currentUser = req.user;
+
+            const result = await sprintsService.deleteSprint(id, currentUser);
             res.status(200).json({ status: "OK", data: result });
         } catch (error) {
             next(error);

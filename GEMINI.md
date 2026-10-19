@@ -10,8 +10,8 @@ Backend:
 
 * Node.js
 * Express
-* PostgreSQL
-* Sequelize ORM
+* PostgreSQL (Sequelize ORM)
+* MongoDB (Mongoose - Historial/Auditoría)
 * JWT Authentication
 
 Frontend:
@@ -20,6 +20,21 @@ Frontend:
 * Standalone Components
 * Signals
 * RxJS
+
+---
+
+## Sistema de Reglas Modulares (.rules/)
+
+Para asegurar la máxima calidad de código, robustez y cumplimiento de estándares con Gemini, consultar obligatoriamente los documentos temáticos especializados según la tarea:
+
+1. **Clean Code & Programación Defensiva (Backend):** [.rules/01-clean-code-backend.md](file:///.rules/01-clean-code-backend.md)
+   * *Consultar al crear o modificar controladores, servicios, helpers o manejo de errores.*
+2. **Screaming Architecture & Organización de Archivos:** [.rules/02-screaming-architecture.md](file:///.rules/02-screaming-architecture.md)
+   * *Consultar al crear nuevos módulos, rutas o ubicar modelos (Postgres vs Mongo).*
+3. **Persistencia Híbrida (PostgreSQL + MongoDB):** [.rules/03-hybrid-databases.md](file:///.rules/03-hybrid-databases.md)
+   * *Consultar al trabajar con modelos Sequelize, consultas con includes o registros en el historial de Mongo (`logActivity`).*
+4. **Convenciones de API, Validación y Seguridad:** [.rules/04-api-and-security.md](file:///.rules/04-api-and-security.md)
+   * *Consultar al diseñar endpoints, esquemas Joi, códigos de estado HTTP y manejo de identidad JWT (`currentUser`).*
 
 ---
 

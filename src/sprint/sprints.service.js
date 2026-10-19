@@ -1,5 +1,6 @@
 import db from '../database/database.js';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../helpers/errors.js';
+import { logActivity } from '../helpers/activityLogger.js';
 
 class SprintsService {
   getSprints = async (projectId, userId) => {
@@ -30,14 +31,14 @@ class SprintsService {
     return sprint;
   }
 
-  createSprint = async (newSprintData, userId) => {
+  createSprint = async (newSprintData, currentUser) => {
     const { projectId, status, startDate, endDate } = newSprintData;
 
     //Validación de acceso al proyecto
     const project = await db.Project.findByPk(projectId, {
       include: {
         model: db.User,
-        where: { id: userId },
+        where: { id: currentUser.id },
         through: { attributes: [] },
         required: true
       }
@@ -59,10 +60,22 @@ class SprintsService {
       }
     }
 
-    return await db.Sprint.create(newSprintData);
+    const createdSprint = await db.Sprint.create(newSprintData);
+
+    await logActivity({
+      action: 'CREATE',
+      entity: 'Sprint',
+      entityId: createdSprint.id,
+      projectId: createdSprint.projectId,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      snapshot: createdSprint.toJSON()
+    });
+
+    return createdSprint;
   };
 
-  updateSprint = async (id, updatedSprintData) => {
+  updateSprint = async (id, updatedSprintData, currentUser) => {
     const sprint = await db.Sprint.findByPk(id);
 
     if (!sprint) {
@@ -70,10 +83,21 @@ class SprintsService {
     }
 
     await sprint.update(updatedSprintData);
+
+    await logActivity({
+      action: 'UPDATE',
+      entity: 'Sprint',
+      entityId: sprint.id,
+      projectId: sprint.projectId,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      changes: updatedSprintData
+    });
+
     return sprint;
   }
 
-  deleteSprint = async (id) => {
+  deleteSprint = async (id, currentUser) => {
     const sprint = await db.Sprint.findByPk(id);
 
     if (!sprint) {
@@ -85,7 +109,18 @@ class SprintsService {
       throw new BadRequestError("No se puede eliminar un sprint que está activo");
     }
 
+    const projectId = sprint.projectId;
     await sprint.destroy();
+
+    await logActivity({
+      action: 'DELETE',
+      entity: 'Sprint',
+      entityId: id,
+      projectId: projectId,
+      userId: currentUser.id,
+      userName: currentUser.name
+    });
+
     return { message: "Sprint eliminado correctamente" };
   };
 }

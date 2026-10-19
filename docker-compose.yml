@@ -14,8 +14,10 @@ services:
       PGDATABASE: ${PGDATABASE}
       PGPORT: ${PGPORT}
       SECRET_JWT_KEY: ${SECRET_JWT_KEY}
+      MONGO_URI: ${MONGO_URI}
     depends_on:
       - db
+      - mongo
 
   db:
     image: postgres
@@ -25,3 +27,13 @@ services:
       POSTGRES_DB: ${PGDATABASE}
     ports:
       - "${EXTERNAL_PGPORT}:${PGPORT}"
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

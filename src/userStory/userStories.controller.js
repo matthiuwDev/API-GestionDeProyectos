@@ -53,7 +53,7 @@ class UserStoriesController {
     
     deleteUserStory = async (req, res, next) => {
         try {
-            const { id } = req.params;
+            const { params: { id }, user } = req;
 
             if (!id) {
                 return res.status(400).json({ 
@@ -62,7 +62,7 @@ class UserStoriesController {
                 });
             }
 
-            await userStoriesService.deleteUserStory(id);
+            await userStoriesService.deleteUserStory(id, user);
             
             res.sendStatus(204); 
         } catch (error) {

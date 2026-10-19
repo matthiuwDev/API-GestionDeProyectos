@@ -2,6 +2,7 @@
 import db from "../database/database.js";
 import { NotFoundError, BadRequestError } from "../helpers/errors.js";
 import { sendAssignmentNotification } from "../helpers/notifications.js";
+import { logActivity } from '../helpers/activityLogger.js';
 
 class UserStoriesService {
     
@@ -78,6 +79,16 @@ class UserStoriesService {
             );
         }
 
+        await logActivity({
+            action: 'CREATE',
+            entity: 'UserStory',
+            entityId: newUserStory.id,
+            projectId: newUserStory.projectId,
+            userId: currentUser.id,
+            userName: currentUser.name,
+            snapshot: newUserStory.toJSON()
+        });
+
         return newUserStory;
     }
 
@@ -105,17 +116,37 @@ class UserStoriesService {
             );
         }
 
+        await logActivity({
+            action: 'UPDATE',
+            entity: 'UserStory',
+            entityId: userStory.id,
+            projectId: userStory.projectId,
+            userId: currentUser.id,
+            userName: currentUser.name,
+            changes: changes
+        });
+
         return userStory; 
     }
 
-    deleteUserStory = async (id) => {
-        const deletedRows = await db.UserStory.destroy({
-            where: { id }
-        });
+    deleteUserStory = async (id, currentUser) => {
+        const userStory = await db.UserStory.findByPk(id);
 
-        if (deletedRows === 0) {
+        if (!userStory) {
             throw new NotFoundError(`No se puede eliminar: No se encontró la Historia de Usuario con ID ${id}`);
         }
+
+        const projectId = userStory.projectId;
+        await userStory.destroy();
+
+        await logActivity({
+            action: 'DELETE',
+            entity: 'UserStory',
+            entityId: id,
+            projectId: projectId,
+            userId: currentUser.id,
+            userName: currentUser.name
+        });
 
         return true;
     }
