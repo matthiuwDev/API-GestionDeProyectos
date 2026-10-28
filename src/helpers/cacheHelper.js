@@ -1,9 +1,9 @@
 import { getRedisClient } from '../database/redis.js';
 
 /**
- * Obtiene un dato desde Redis o lo consulta en la base de datos si no está en caché.
- * Si el cliente de Redis no está disponible o falla la lectura, ejecuta el callback
- * directamente contra la base de datos para no interrumpir el servicio.
+ * Recupera un valor desde Redis o ejecuta `fetchFn` para obtenerlo de la base de datos
+ * y almacenarlo en caché (Cache-Aside). Si Redis no está disponible, delega la consulta
+ * directamente a `fetchFn` sin interrumpir el flujo.
  *
  * @param {string} key - Clave de búsqueda en Redis (ej. 'tasks:15').
  * @param {number|Function} [ttlSeconds=120] - Tiempo de expiración en segundos, o el callback si se omite el TTL.
@@ -28,8 +28,8 @@ export const getOrSetCache = async (key, ttlSeconds = 120, fetchFn) => {
         if (cached !== null) {
             return JSON.parse(cached);
         }
-    } catch (error) {
-        console.warn(`Error al leer la clave "${key}":`, error.message);
+    } catch (cacheError) {
+        console.warn(`Error al leer clave "${key}":`, cacheError.message);
     }
 
     const freshData = await fetchFn();
@@ -37,8 +37,8 @@ export const getOrSetCache = async (key, ttlSeconds = 120, fetchFn) => {
     if (freshData !== null && freshData !== undefined) {
         try {
             await redis.set(key, JSON.stringify(freshData), 'EX', ttlSeconds);
-        } catch (error) {
-            console.warn(`Error al guardar en caché la clave "${key}":`, error.message);
+        } catch (setError) {
+            console.warn(`Error al escribir clave "${key}":`, setError.message);
         }
     }
 
@@ -52,22 +52,28 @@ export const getOrSetCache = async (key, ttlSeconds = 120, fetchFn) => {
  * @param {string} key - Clave exacta que se desea limpiar (ej. 'tasks:15').
  * @returns {Promise<void>}
  */
-export const invalidateCache = async (key) => {
+export const invalidateCache = async (...keys) => {
     const redis = getRedisClient();
-    if (!redis) return;
+    if (!redis || keys.length === 0) return;
+
+    const flatKeys = keys.flat().filter(Boolean);
+    if (flatKeys.length === 0) return;
 
     try {
-        await redis.del(key);
+        await redis.del(...flatKeys);
     } catch (error) {
-        console.warn(`[Redis] Error al eliminar la clave "${key}":`, error.message);
+        console.warn(`Error al invalidar claves [${flatKeys.join(', ')}]:`, error.message);
     }
 };
 
 /**
- * Elimina todas las claves que coincidan con un patrón (ej. 'tasks:project:5:*').
+ * Invalida un grupo de claves que coincidan con un patrón determinado.
+ * Utiliza scanStream para no bloquear el proceso de Redis
  *
- * @param {string} pattern - Patrón con comodín para buscar las claves a limpiar.
- * @returns {Promise<void>}
+ * Ejemplos:
+ *   await invalidateCacheByPattern('tasks:userStory:*')
+ *
+ * @param {string} pattern - Patrón con comodín (ej: 'tasks:*')
  */
 export const invalidateCacheByPattern = async (pattern) => {
     const redis = getRedisClient();
@@ -87,7 +93,7 @@ export const invalidateCacheByPattern = async (pattern) => {
             await redis.del(...keysToDelete);
         }
     } catch (error) {
-        console.warn(`[Redis] Error al limpiar claves con el patrón "${pattern}":`, error.message);
+        console.warn(`Error al invalidar patrón "${pattern}" en Redis:`, error.message);
     }
 };
 
