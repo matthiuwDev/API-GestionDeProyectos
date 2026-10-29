@@ -2,7 +2,7 @@ import db from '../database/database.js';
 import { NotFoundError, BadRequestError } from '../helpers/errors.js';
 import { sendAssignmentNotification } from '../helpers/notifications.js';
 import { logActivity } from '../helpers/activityLogger.js';
-import { getOrSetCache, invalidateCache } from '../helpers/cacheHelper.js';
+import { getOrSetCache, invalidateCache, invalidateCacheByPattern } from '../helpers/cacheHelper.js';
 
 class TasksService {
   getTasks = async (filter = {}) => {
@@ -67,11 +67,12 @@ class TasksService {
     const createdTask = await db.Task.create(newTask);
     const userStory = await db.UserStory.findByPk(newTask.userStoryId);
 
-    //Invalidar caché: la lista de tareas de la HU y la lista general cambian
+    //Invalidar caché de tareas y del árbol de historias del proyecto
     await invalidateCache(
       `tasks:userStory:${newTask.userStoryId}`,
       'tasks:all'
     );
+    await invalidateCacheByPattern(`userStories:proj:${userStory.projectId}:*`);
 
     if (newTask.assigneeId && currentUser) {
       await sendAssignmentNotification(
@@ -113,15 +114,17 @@ class TasksService {
     const oldUserStoryId = task.userStoryId;
     await task.update(changes);
 
-    //Invalidar caché: la tarea puntual, la lista de su HU (y la nueva si cambió de HU) y la general
+    const userStory = await db.UserStory.findByPk(task.userStoryId);
+
+    // Invalidar caché de tareas y del árbol de historias del proyecto
     await invalidateCache(
       `tasks:${task.id}`,
       `tasks:userStory:${oldUserStoryId}`,
       changes.userStoryId ? `tasks:userStory:${changes.userStoryId}` : null,
       'tasks:all'
     );
+    await invalidateCacheByPattern(`userStories:proj:${userStory.projectId}:*`);
 
-    const userStory = await db.UserStory.findByPk(task.userStoryId);
     if (changes.assigneeId && changes.assigneeId !== oldAssigneeId && currentUser) {
       await sendAssignmentNotification(
         changes.assigneeId,
@@ -157,12 +160,13 @@ class TasksService {
 
     await task.destroy();
 
-    //Invalidar caché: eliminar la tarea individual y la lista de su HU
+    //Invalidar caché de tareas y del árbol de historias del proyecto
     await invalidateCache(
       `tasks:${id}`,
       `tasks:userStory:${userStoryId}`,
       'tasks:all'
     );
+    await invalidateCacheByPattern(`userStories:proj:${userStory.projectId}:*`);
 
     await logActivity({
       action: 'DELETE',
