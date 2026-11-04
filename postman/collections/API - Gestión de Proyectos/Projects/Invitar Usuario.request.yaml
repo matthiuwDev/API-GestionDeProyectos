@@ -1,14 +1,15 @@
 $kind: http-request
-name: Invitar Usuario
 url: "{{baseUrl}}/api/v1/projects/1/invite"
 method: POST
 body:
   type: json
   content: "{\r
 
-    \    \"email\": \"correo@correo.com\"\r
+    \    \"email\": \"mateoe481@gmail.com\"\r
 
     }"
 auth:
-  type: noauth
+  type: inherit
+  credentials:
+    id: 8ba8faba-a774-4f3c-ad6c-67f177ee79d0
 order: 5325

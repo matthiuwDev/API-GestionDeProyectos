@@ -1,16 +1,15 @@
 $kind: http-request
-name: Create User Story
 method: POST
-url: '{{baseUrl}}/api/v1/user-stories'
+url: "{{baseUrl}}/api/v1/user-stories"
 order: 3000
 headers:
-  - key: Content-Type
-    value: application/json
+  Content-Type: application/json
 body:
   type: json
   content: |-
     {
-      "name": "As a user I want to...",
-      "description": 1,
-      "projectId": 1
+      "name": "Prueba Historial Mongo HUs",
+      "description": "Esto con el fin de validar historial MongoDB",
+      "projectId": 1, 
+      "assigneeId": 5
     }

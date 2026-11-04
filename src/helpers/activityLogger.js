@@ -1,4 +1,5 @@
 import Activity from '../models/mongo-models/Activity.js';
+import { invalidateCacheByPattern } from './cacheHelper.js';
 
 export const logActivity = async ({ action, entity, entityId, projectId, userId, userName, snapshot = null, changes = null }) => {
     try {
@@ -18,6 +19,9 @@ export const logActivity = async ({ action, entity, entityId, projectId, userId,
             snapshot,
             changes
         });
+
+        //Invalidar caché del historial
+        await invalidateCacheByPattern(`history:proj:${projectId}:*`);
 
         console.log(`Actividad registrada: ${userName} hizo ${action} en ${entity} ${entityId}`); 
 
