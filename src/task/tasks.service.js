@@ -2,28 +2,40 @@ import db from '../database/database.js';
 import { NotFoundError, BadRequestError } from '../helpers/errors.js';
 import { sendAssignmentNotification } from '../helpers/notifications.js';
 import { logActivity } from '../helpers/activityLogger.js';
+import { getOrSetCache, invalidateCache, invalidateCacheByPattern } from '../helpers/cacheHelper.js';
 
 class TasksService {
   getTasks = async (filter = {}) => {
-    const where = {};
-    if (filter.userStoryId) {
-      where.userStoryId = filter.userStoryId;
-    }
-    return await db.Task.findAll({ 
-      where,
-      include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }]
+    // Si filtra por userStoryId la clave es 'tasks:userStory:309', sino 'tasks:all'
+    const cacheKey = filter.userStoryId 
+      ? `tasks:userStory:${filter.userStoryId}` 
+      : 'tasks:all';
+
+    return await getOrSetCache(cacheKey, 120, async () => {
+      const where = {};
+      if (filter.userStoryId) {
+        where.userStoryId = filter.userStoryId;
+      }
+      return await db.Task.findAll({ 
+        where,
+        include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }]
+      });
     });
   };
 
   getOneTask = async (id) => {
-    const task = await db.Task.findByPk(id, {
-      include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }]
-    });
+    const cacheKey = `tasks:${id}`;
 
-    if (!task) {
-      throw new NotFoundError(`No se encontró la tarea con ID ${id}`);
-    }
-    return task;
+    return await getOrSetCache(cacheKey, 120, async () => {
+      const task = await db.Task.findByPk(id, {
+        include: [{ model: db.User, as: 'assignee', attributes: ['id', 'name', 'email'] }]
+      });
+
+      if (!task) {
+        throw new NotFoundError(`No se encontró la tarea con ID ${id}`);
+      }
+      return task;
+    });
   };
 
   // Validar que el usuario asignado sea miembro del proyecto de la HU
@@ -54,6 +66,13 @@ class TasksService {
     
     const createdTask = await db.Task.create(newTask);
     const userStory = await db.UserStory.findByPk(newTask.userStoryId);
+
+    //Invalidar caché de tareas y del árbol de historias del proyecto
+    await invalidateCache(
+      `tasks:userStory:${newTask.userStoryId}`,
+      'tasks:all'
+    );
+    await invalidateCacheByPattern(`userStories:proj:${userStory.projectId}:*`);
 
     if (newTask.assigneeId && currentUser) {
       await sendAssignmentNotification(
@@ -92,9 +111,20 @@ class TasksService {
     }
 
     const oldAssigneeId = task.assigneeId;
+    const oldUserStoryId = task.userStoryId;
     await task.update(changes);
 
     const userStory = await db.UserStory.findByPk(task.userStoryId);
+
+    // Invalidar caché de tareas y del árbol de historias del proyecto
+    await invalidateCache(
+      `tasks:${task.id}`,
+      `tasks:userStory:${oldUserStoryId}`,
+      changes.userStoryId ? `tasks:userStory:${changes.userStoryId}` : null,
+      'tasks:all'
+    );
+    await invalidateCacheByPattern(`userStories:proj:${userStory.projectId}:*`);
+
     if (changes.assigneeId && changes.assigneeId !== oldAssigneeId && currentUser) {
       await sendAssignmentNotification(
         changes.assigneeId,
@@ -126,8 +156,17 @@ class TasksService {
     }
 
     const userStory = await db.UserStory.findByPk(task.userStoryId);
+    const userStoryId = task.userStoryId;
 
     await task.destroy();
+
+    //Invalidar caché de tareas y del árbol de historias del proyecto
+    await invalidateCache(
+      `tasks:${id}`,
+      `tasks:userStory:${userStoryId}`,
+      'tasks:all'
+    );
+    await invalidateCacheByPattern(`userStories:proj:${userStory.projectId}:*`);
 
     await logActivity({
       action: 'DELETE',

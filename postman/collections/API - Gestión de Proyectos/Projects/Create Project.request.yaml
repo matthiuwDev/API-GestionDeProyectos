@@ -1,16 +1,18 @@
 $kind: http-request
-name: Create Project
 method: POST
-url: '{{baseUrl}}/api/v1/projects'
+url: "{{baseUrl}}/api/v1/projects"
+auth:
+  type: inherit
+  credentials:
+    id: 8ba8faba-a774-4f3c-ad6c-67f177ee79d0
 order: 3000
 headers:
-  - key: Content-Type
-    value: application/json
+  Content-Type: application/json
 body:
   type: json
   content: |-
     {
-      "name": "My Project",
-      "priority": 1,
-      "description": "Project description"
+      "name": "Proyecto PACTO",
+      "priority": 5,
+      "description": "Project description #2"
     }

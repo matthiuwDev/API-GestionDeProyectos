@@ -1,2 +1,5 @@
 name: Globals
-values: []
+values:
+  - key: jwt_token
+    value: ''
+    enabled: true
