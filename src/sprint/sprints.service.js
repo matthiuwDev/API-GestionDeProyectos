@@ -1,10 +1,11 @@
 import db from '../database/database.js';
 import { NotFoundError, BadRequestError, ForbiddenError } from '../helpers/errors.js';
 import { logActivity } from '../helpers/activityLogger.js';
+import { getOrSetCache, invalidateCache, invalidateCacheByPattern } from '../helpers/cacheHelper.js';
 
 class SprintsService {
   getSprints = async (projectId, userId) => {
-    // Verificar que el usuario pertenezca al proyecto
+    //alidar que el usuario pertenezca al proyecto 
     const project = await db.Project.findByPk(projectId, {
       include: {
         model: db.User,
@@ -18,23 +19,29 @@ class SprintsService {
       throw new ForbiddenError(`No tienes acceso al proyecto con ID ${projectId}`);
     }
 
-    return await db.Sprint.findAll({
-      where: { projectId }
+    const cacheKey = `sprints:project:${projectId}`;
+    return await getOrSetCache(cacheKey, 120, async () => {
+      return await db.Sprint.findAll({
+        where: { projectId }
+      });
     });
   };
 
   getSprintById = async (id, userId) => {
-    const sprint = await db.Sprint.findByPk(id);
-    if (!sprint) {
-      throw new NotFoundError(`No se encontró el sprint con ID ${id}`);
-    }
-    return sprint;
+    const cacheKey = `sprints:${id}`;
+
+    return await getOrSetCache(cacheKey, 120, async () => {
+      const sprint = await db.Sprint.findByPk(id);
+      if (!sprint) {
+        throw new NotFoundError(`No se encontró el sprint con ID ${id}`);
+      }
+      return sprint;
+    });
   }
 
   createSprint = async (newSprintData, currentUser) => {
     const { projectId, status, startDate, endDate } = newSprintData;
 
-    //Validación de acceso al proyecto
     const project = await db.Project.findByPk(projectId, {
       include: {
         model: db.User,
@@ -62,6 +69,9 @@ class SprintsService {
 
     const createdSprint = await db.Sprint.create(newSprintData);
 
+    //Invalidar caché de sprints del proyecto
+    await invalidateCache(`sprints:project:${createdSprint.projectId}`);
+
     await logActivity({
       action: 'CREATE',
       entity: 'Sprint',
@@ -84,6 +94,13 @@ class SprintsService {
 
     await sprint.update(updatedSprintData);
 
+    //Invalidar caché del sprint, lista del proyecto y vistas de historias relacionadas
+    await invalidateCache(
+      `sprints:${sprint.id}`,
+      `sprints:project:${sprint.projectId}`
+    );
+    await invalidateCacheByPattern(`userStories:proj:${sprint.projectId}:*`);
+
     await logActivity({
       action: 'UPDATE',
       entity: 'Sprint',
@@ -104,13 +121,20 @@ class SprintsService {
       throw new NotFoundError(`No se encontró el sprint con ID ${id}`);
     }
 
-    // Regla 3: Impedir eliminar ACTIVE
+    // Impedir eliminaci+on de sprints activos
     if (sprint.status === 'ACTIVE') {
       throw new BadRequestError("No se puede eliminar un sprint que está activo");
     }
 
     const projectId = sprint.projectId;
     await sprint.destroy();
+
+    //Invalidar caché del sprint, lista del proyecto y vistas de historias relacionadas
+    await invalidateCache(
+      `sprints:${id}`,
+      `sprints:project:${projectId}`
+    );
+    await invalidateCacheByPattern(`userStories:proj:${projectId}:*`);
 
     await logActivity({
       action: 'DELETE',
